@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Next Level Global</title>
-    <!-- Gerekli Kütüphaneler -->
+    <title>Next Level Global | Premium Archive</title>
+    <!-- Libraries -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -40,14 +40,20 @@
         .post-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 24px;
+            border-radius: 20px;
             overflow: hidden;
-            transition: all 0.5s ease;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .post-card:hover {
             border-color: var(--accent);
             transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
         }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
     </style>
 </head>
 <body>
@@ -57,68 +63,118 @@
         const { useState, useEffect } = React;
 
         function App() {
+            const [view, setView] = useState('home'); // home, article, admin
+            const [selectedArticle, setSelectedArticle] = useState(null);
+
+            // Haber verileri
+            const articles = [
+                {
+                    id: 1,
+                    category: "Teknoloji & Estetik",
+                    title: "DİJİTAL ESTETİĞİN EVRİMİ",
+                    date: "MART 2026",
+                    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000",
+                    excerpt: "Yapay zekanın tasarım süreçlerine entegrasyonu, görsel dünyamızı kökten değiştiriyor. Minimalizmin ötesine geçiyoruz.",
+                    content: "Dijital tasarımın geleceği artık sadece piksellerle değil, algoritmalarla şekilleniyor. Yapay zeka, tasarımcının yerini almaktan ziyade ona sınırsız bir fırça sunuyor. Bu makalede, 2026 yılının en çarpıcı tasarım trendlerini ve 'Supreme' estetiğin nasıl yeni standart haline geldiğini inceliyoruz..."
+                },
+                {
+                    id: 2,
+                    category: "Siber Güvenlik",
+                    title: "KUANTUM İŞLEMCİLER",
+                    date: "ŞUBAT 2026",
+                    image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1000",
+                    excerpt: "Siber güvenlik dünyası, kuantum sıçramasına hazırlanıyor. Veri şifreleme standartları yeniden yazılıyor.",
+                    content: "Kuantum bilgisayarların işlem gücü, bugünkü en karmaşık şifreleme yöntemlerini saniyeler içinde çözebilir hale geldi. Bu durum, 'Post-Quantum Cryptography' dediğimiz yeni bir dönemi başlattı. Verilerimizi korumak için artık atom altı parçacıkların kurallarına göre oynuyoruz."
+                }
+            ];
+
+            const handleReadMore = (article) => {
+                setSelectedArticle(article);
+                setView('article');
+                window.scrollTo(0, 0);
+            };
+
             return (
-                <div className="min-h-screen">
-                    {/* Header Section */}
-                    <header className="py-12 border-b border-white/5 text-center bg-black/80 backdrop-blur-xl sticky top-0 z-50">
-                        <h1 className="text-6xl font-serif font-black italic gold-text tracking-tighter leading-none">Next Level</h1>
-                        <p className="text-[10px] tracking-[0.6em] uppercase text-gray-500 mt-4 font-bold">Premium Digital Archive System</p>
+                <div className="min-h-screen flex flex-col">
+                    {/* Header Section - Artık daha kompakt ve modern */}
+                    <header className="py-6 border-b border-white/5 text-center bg-black/80 backdrop-blur-xl sticky top-0 z-50">
+                        <div className="cursor-pointer" onClick={() => setView('home')}>
+                            <h1 className="text-4xl font-serif font-black italic gold-text tracking-tighter leading-none">Next Level</h1>
+                            <p className="text-[8px] tracking-[0.6em] uppercase text-gray-500 mt-2 font-bold">Premium Digital Archive</p>
+                        </div>
                     </header>
 
-                    {/* Haber Bandı */}
-                    <div className="bg-black py-4 border-b border-white/5 overflow-hidden whitespace-nowrap">
-                        <div className="inline-block ticker-move text-accent text-[11px] font-bold uppercase tracking-widest">
-                            NEXT LEVEL GLOBAL — PREMIUM HABER DENEYİMİ — YENİ NESİL DİJİTAL YAYINCILIK — STRATEJİK ANALİZ — &nbsp;&nbsp;
-                            NEXT LEVEL GLOBAL — PREMIUM HABER DENEYİMİ — YENİ NESİL DİJİTAL YAYINCILIK — STRATEJİK ANALİZ — &nbsp;&nbsp;
+                    {/* News Ticker */}
+                    <div className="bg-black py-3 border-b border-white/5 overflow-hidden whitespace-nowrap">
+                        <div className="inline-block ticker-move text-accent text-[10px] font-bold uppercase tracking-widest">
+                            NEXT LEVEL GLOBAL — YENİ NESİL DİJİTAL YAYINCILIK — STRATEJİK ANALİZ — PREMIUM DENEYİM — &nbsp;&nbsp;
                         </div>
                     </div>
 
-                    {/* Ana İçerik */}
-                    <main className="max-w-6xl mx-auto p-10">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                            
-                            <article className="post-card group cursor-pointer">
-                                <div className="aspect-video overflow-hidden">
-                                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000" />
+                    {/* View Logic */}
+                    <div className="flex-grow">
+                        {view === 'home' && (
+                            <main className="max-w-6xl mx-auto p-8 lg:p-12">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                    {articles.map(art => (
+                                        <article key={art.id} className="post-card group">
+                                            <div className="aspect-video overflow-hidden">
+                                                <img src={art.image} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105" />
+                                            </div>
+                                            <div className="p-8">
+                                                <div className="text-accent text-[9px] font-bold uppercase tracking-widest mb-3">{art.category}</div>
+                                                <h2 className="text-2xl font-bold font-serif mb-4 group-hover:text-accent transition-colors italic">{art.title}</h2>
+                                                <p className="text-gray-500 text-sm leading-relaxed mb-6">{art.excerpt}</p>
+                                                <div className="pt-6 border-t border-white/5 flex justify-between items-center text-[10px] text-gray-400 font-bold uppercase">
+                                                    <span>{art.date}</span>
+                                                    <button 
+                                                        onClick={() => handleReadMore(art)}
+                                                        className="text-accent hover:tracking-widest transition-all duration-300"
+                                                    >
+                                                        DEVAMINI OKU →
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </article>
+                                    ))}
                                 </div>
-                                <div className="p-8">
-                                    <div className="text-accent text-[9px] font-bold uppercase tracking-widest mb-3">Teknoloji & Estetik</div>
-                                    <h2 className="text-3xl font-bold font-serif mb-4 group-hover:text-accent transition-colors italic">DİJİTAL ESTETİĞİN EVRİMİ</h2>
-                                    <p className="text-gray-500 text-sm leading-relaxed mb-6">Yapay zekanın tasarım süreçlerine entegrasyonu, görsel dünyamızı kökten değiştiriyor. Minimalizmin ötesine geçiyoruz.</p>
-                                    <div className="pt-6 border-t border-white/5 flex justify-between items-center text-[10px] text-gray-600 font-bold uppercase">
-                                        <span>MART 2026</span>
-                                        <span className="text-accent">DEVAMINI OKU</span>
-                                    </div>
-                                </div>
-                            </article>
+                            </main>
+                        )}
 
-                            <article className="post-card group cursor-pointer">
-                                <div className="aspect-video overflow-hidden">
-                                    <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1000" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000" />
+                        {view === 'article' && selectedArticle && (
+                            <main className="max-w-3xl mx-auto p-8 lg:py-20 animate-in fade-in duration-700">
+                                <button onClick={() => setView('home')} className="text-accent text-[10px] font-bold tracking-widest mb-10 block">← GERİ DÖN</button>
+                                <div className="text-accent text-xs font-bold uppercase tracking-widest mb-4">{selectedArticle.category}</div>
+                                <h2 className="text-5xl font-black font-serif italic mb-8 leading-tight">{selectedArticle.title}</h2>
+                                <img src={selectedArticle.image} className="w-full rounded-3xl mb-12 shadow-2xl border border-white/5" />
+                                <div className="text-gray-400 leading-[2] text-lg space-y-6">
+                                    <p>{selectedArticle.content}</p>
+                                    <p>İçerik arşivleme süreçlerimiz, bilginin en saf halini gelecek nesillere aktarmak üzere tasarlanmıştır. Bu makale, Next Level Premium kütüphanesinin bir parçasıdır.</p>
                                 </div>
-                                <div className="p-8">
-                                    <div className="text-accent text-[9px] font-bold uppercase tracking-widest mb-3">Siber Güvenlik</div>
-                                    <h2 className="text-3xl font-bold font-serif mb-4 group-hover:text-accent transition-colors italic">KUANTUM İŞLEMCİLER</h2>
-                                    <p className="text-gray-500 text-sm leading-relaxed mb-6">Siber güvenlik dünyası, kuantum sıçramasına hazırlanıyor. Veri şifreleme standartları yeniden yazılıyor.</p>
-                                    <div className="pt-6 border-t border-white/5 flex justify-between items-center text-[10px] text-gray-600 font-bold uppercase">
-                                        <span>ŞUBAT 2026</span>
-                                        <span className="text-accent">DEVAMINI OKU</span>
-                                    </div>
-                                </div>
-                            </article>
+                            </main>
+                        )}
 
+                        {view === 'admin' && (
+                            <main className="max-w-xl mx-auto p-20 text-center">
+                                <h2 className="text-2xl font-bold mb-8 gold-text uppercase tracking-tighter">Yönetici Girişi</h2>
+                                <div className="space-y-4">
+                                    <input type="password" placeholder="Erişim Anahtarı" className="w-full bg-surface border border-white/10 p-4 rounded-xl outline-none focus:border-accent text-center" />
+                                    <button className="w-full bg-accent text-black font-bold p-4 rounded-xl hover:bg-white transition-colors uppercase text-xs tracking-widest">Sisteme Bağlan</button>
+                                    <button onClick={() => setView('home')} className="text-gray-600 text-[10px] mt-4 block mx-auto">İPTAL</button>
+                                </div>
+                            </main>
+                        )}
+                    </div>
+
+                    {/* Footer - Daha dengeli ve profesyonel */}
+                    <footer className="py-12 border-t border-white/5 text-center bg-black/40 backdrop-blur-md">
+                        <div className="gold-text font-serif font-bold text-xl mb-4 italic">Next Level Global</div>
+                        <div className="flex justify-center gap-8 mb-6 text-[9px] font-bold text-gray-500 tracking-[0.2em] uppercase">
+                            <button onClick={() => setView('home')} className="hover:text-accent">Arşiv</button>
+                            <button onClick={() => setView('admin')} className="hover:text-accent">Panel</button>
+                            <a href="#" className="hover:text-accent">Gizlilik</a>
                         </div>
-                    </main>
-
-                    {/* Footer */}
-                    <footer className="py-24 border-t border-white/5 text-center bg-black/50">
-                        <div className="gold-text font-serif font-bold text-2xl mb-6 italic">Next Level Global</div>
-                        <div className="flex justify-center gap-10 mb-10 text-[10px] font-bold text-gray-600 tracking-[0.3em] uppercase">
-                            <a href="#" className="hover:text-accent transition-colors">Arşiv</a>
-                            <a href="#" className="hover:text-accent transition-colors">İletişim</a>
-                            <a href="#" className="hover:text-accent transition-colors">Hakkımızda</a>
-                        </div>
-                        <p className="text-[9px] tracking-[0.5em] text-gray-800">© 2026 SUPREME ARCHIVE — ALL RIGHTS RESERVED</p>
+                        <p className="text-[8px] tracking-[0.4em] text-gray-800">© 2026 SUPREME ARCHIVE — ALL RIGHTS RESERVED</p>
                     </footer>
                 </div>
             );
