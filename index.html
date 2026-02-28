@@ -21,10 +21,10 @@
             color: white; 
             font-family: 'Montserrat', sans-serif; 
             margin: 0;
+            overflow-x: hidden;
         }
         .gold-text { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* Animasyonlar */
         @keyframes scroll-left { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         .animate-scroll { animation: scroll-left 15s linear infinite; display: inline-block; white-space: nowrap; }
@@ -32,30 +32,48 @@
         
         .post-card {
             background: var(--surface);
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.03);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .post-card:hover { border-color: var(--accent); transform: translateY(-8px); }
+        .post-card:hover { border-color: var(--accent); transform: translateY(-4px); }
         
         .admin-input, .admin-select {
             width: 100%;
             background: #151515;
             border: 1px solid rgba(255,255,255,0.1);
-            padding: 12px;
-            border-radius: 8px;
+            padding: 10px;
+            border-radius: 6px;
             color: white;
             outline: none;
-            font-size: 13px;
+            font-size: 12px;
         }
-        .rich-content img { max-width: 100%; height: auto; border-radius: 8px; margin: 2rem 0; }
+        .rich-content img { 
+            max-width: 80%; 
+            height: auto; 
+            border-radius: 12px; 
+            margin: 2rem auto; 
+            display: block;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
         .rich-content iframe { width: 100%; aspect-ratio: 16/9; border-radius: 12px; margin: 2rem 0; }
+        
+        /* Makale İçi Resim Boyutu Kontrolü */
+        .article-hero-img {
+            max-width: 900px;
+            width: 100%;
+            height: 450px;
+            object-fit: cover;
+            margin: 0 auto 3rem;
+            border-radius: 16px;
+            display: block;
+        }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
+        const { useState, useEffect } = React;
 
         const SafeHTML = ({ content, style, className }) => {
             return <div style={style} className={className} dangerouslySetInnerHTML={{ __html: content }} />;
@@ -69,20 +87,18 @@
             const [currentPage, setCurrentPage] = useState(1);
             const postsPerPage = 8;
 
-            // Reklam Ayarları
+            // Ayarlar
             const [ads, setAds] = useState({
-                siteUstu: { active: true, content: "YENİ KOLEKSİYON: DİJİTAL RÖNESANS YAYINDA", color: "#d4af37", effect: "none", font: "Montserrat" },
+                siteUstu: { active: true, content: "YENİ KOLEKSİYON: DİJİTAL RÖNESANS YAYINDA", color: "#d4af37", effect: "none", font: "Montserrat", emoji: "📢" },
                 siteAlti: { active: true, content: "© 2026 NEXT LEVEL PREMIUM MEDIA", color: "#666666", effect: "none", font: "Montserrat" },
                 listeOrtasi: { active: true, content: "ÖZEL İÇERİK: GELECEĞİ TASARLAYANLAR", color: "#ffffff", effect: "blink", font: "Playfair Display" },
                 makaleIci: { active: true, content: "REKLAM: PREMIUM ÜYELİKTE %50 İNDİRİM", color: "#d4af37", effect: "none", font: "Space Mono" }
             });
 
-            // Başlangıç Verileri
             const [articles, setArticles] = useState([
-                { id: 1, category: "MİMARİ", title: "GELECEĞİN ŞEHİRLERİ", titleColor: "#d4af37", titleFont: "Playfair Display", date: "MART 2026", image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800", excerpt: "Sürdürülebilir gökdelenler ve yeşil teknoloji.", content: "<p>Şehirleşme hızı artarken mimari yaklaşımlar doğayla bütünleşmek zorunda...</p>" },
+                { id: 1, category: "MİMARİ", title: "GELECEĞİN ŞEHİRLERİ", titleColor: "#d4af37", titleFont: "Playfair Display", date: "MART 2026", image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800", excerpt: "Sürdürülebilir gökdelenler ve yeşil teknoloji.", content: "<p>Şehirleşme hızı artarken mimari yaklaşımlar doğayla bütünleşmek zorunda...</p><img src='https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800' /><p>Teknoloji ve doğa uyumu geleceğin anahtarı.</p>" },
                 { id: 2, category: "TEKNOLOJİ", title: "METAVERSE VE ÖTESİ", titleColor: "#ffffff", titleFont: "Montserrat", date: "ŞUBAT 2026", image: "https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=800", excerpt: "Sanal gerçeklikte yeni bir yaşam formu.", content: "<p>Dijital evrenler artık sadece oyun değil, ekonomi merkezi haline geliyor.</p>" },
-                { id: 3, category: "MODA", title: "SİBERPUNK ESTETİĞİ", titleColor: "#ff00ff", titleFont: "Space Mono", date: "OCAK 2026", image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800", excerpt: "Neon ışıklar ve teknolojik kumaşlar.", content: "<p>Moda dünyası yüksek teknolojiyi sokağa taşıyor.</p>" },
-                { id: 4, category: "SANAT", title: "AI VE YARATICILIK", titleColor: "#ffffff", titleFont: "Playfair Display", date: "ARALIK 2025", image: "https://images.unsplash.com/photo-1547891261-38f2966ead31?w=800", excerpt: "Yapay zeka fırçayı eline mi alıyor?", content: "<p>Sanatın tanımı algoritmalarla yeniden yapılıyor.</p>" }
+                { id: 3, category: "MODA", title: "SİBERPUNK ESTETİĞİ", titleColor: "#ff00ff", titleFont: "Space Mono", date: "OCAK 2026", image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800", excerpt: "Neon ışıklar ve teknolojik kumaşlar.", content: "<p>Moda dünyası yüksek teknolojiyi sokağa taşıyor.</p>" }
             ]);
 
             const [form, setForm] = useState({ title: '', titleColor: '#ffffff', titleFont: 'Montserrat', category: '', excerpt: '', content: '', image: '' });
@@ -109,7 +125,6 @@
                 setView('dashboard');
             };
 
-            // Sayfalama Hesaplama
             const indexOfLastPost = currentPage * postsPerPage;
             const indexOfFirstPost = indexOfLastPost - postsPerPage;
             const currentPosts = articles.slice(indexOfFirstPost, indexOfLastPost);
@@ -117,51 +132,55 @@
 
             return (
                 <div className="min-h-screen flex flex-col bg-[#050505]">
-                    {/* Üst Duyuru Alanı */}
-                    <div className="bg-[#111] border-b border-white/5 py-2 px-4 flex items-center justify-center gap-4 overflow-hidden">
-                        <span className="bg-accent text-black text-[9px] font-black px-2 py-0.5 rounded italic">DUYURU</span>
-                        <div className={`text-[10px] tracking-widest font-bold uppercase ${ads.siteUstu.effect === 'scroll' ? 'animate-scroll' : (ads.siteUstu.effect === 'blink' ? 'animate-blink' : '')}`}
+                    
+                    {/* Duyuru Emojisi ve Metni - Sağ Üst Sabit */}
+                    <div className="fixed top-0 right-0 z-[100] flex items-center bg-black/80 backdrop-blur px-4 py-1.5 border-b border-l border-white/10 rounded-bl-lg">
+                        <div className={`text-[10px] tracking-widest font-bold mr-3 ${ads.siteUstu.effect === 'blink' ? 'animate-blink' : ''}`}
                              style={{ color: ads.siteUstu.color, fontFamily: ads.siteUstu.font }}>
                             <SafeHTML content={ads.siteUstu.content} />
                         </div>
+                        <span className="text-sm">{ads.siteUstu.emoji}</span>
                     </div>
 
-                    {/* Header */}
-                    <header className="py-8 px-12 flex justify-between items-center border-b border-white/5 bg-black/50 backdrop-blur-md sticky top-0 z-50">
-                        <div className="flex-1"></div>
-                        <div className="text-center flex-1 cursor-pointer" onClick={() => {setView('home'); setSelectedArticle(null);}}>
-                            <h1 className="text-4xl font-serif font-black italic gold-text tracking-tighter">Next Level</h1>
-                            <p className="text-[8px] tracking-[0.6em] uppercase text-gray-500 font-bold">Premium Media</p>
-                        </div>
-                        <div className="flex-1 flex justify-end">
-                            <button onClick={() => setView('admin')} className="text-[10px] font-bold tracking-widest text-gray-400 hover:text-accent transition-colors">GİRİŞ</button>
+                    {/* Minimal Header */}
+                    <header className="py-6 px-12 border-b border-white/5 bg-black/40 backdrop-blur-sm sticky top-0 z-50">
+                        <div className="max-w-[1400px] mx-auto flex justify-center items-center relative">
+                            <div className="text-center cursor-pointer group" onClick={() => {setView('home'); setSelectedArticle(null);}}>
+                                <h1 className="text-2xl font-serif font-black italic gold-text tracking-tighter">Next Level</h1>
+                                <p onClick={(e) => { e.stopPropagation(); setView('admin'); }} 
+                                   className="text-[7px] tracking-[0.6em] uppercase text-gray-600 font-bold hover:text-accent transition-colors">
+                                    Premium Media
+                                </p>
+                            </div>
                         </div>
                     </header>
 
-                    {/* Ana İçerik */}
                     <div className="flex-grow">
                         {view === 'home' && (
-                            <main className="max-w-[1400px] mx-auto p-12">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                            <main className="max-w-[1300px] mx-auto p-8 lg:p-12">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                                     {currentPosts.map((art, index) => (
                                         <React.Fragment key={art.id}>
-                                            <article className="post-card group cursor-pointer" onClick={() => {setSelectedArticle(art); setView('article'); window.scrollTo(0,0);}}>
-                                                <div className="aspect-[4/5] overflow-hidden bg-[#111]">
-                                                    <img src={art.image} className="w-full h-full object-cover transition duration-1000 group-hover:scale-110 opacity-80 group-hover:opacity-100" />
+                                            <article className="post-card group cursor-pointer rounded-lg overflow-hidden" onClick={() => {setSelectedArticle(art); setView('article'); window.scrollTo(0,0);}}>
+                                                <div className="aspect-[3/2] overflow-hidden bg-[#111]">
+                                                    <img src={art.image} className="w-full h-full object-cover transition duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100" />
                                                 </div>
-                                                <div className="p-6">
-                                                    <div className="flex justify-between items-center mb-4">
-                                                        <span className="text-accent text-[9px] font-black tracking-[0.2em]">{art.category}</span>
-                                                        <span className="text-gray-600 text-[9px] font-bold">{art.date}</span>
+                                                <div className="p-5">
+                                                    <div className="flex justify-between items-center mb-3">
+                                                        <span className="text-accent text-[8px] font-black tracking-[0.2em]">{art.category}</span>
+                                                        <span className="text-gray-600 text-[8px] font-bold">{art.date}</span>
                                                     </div>
-                                                    <h2 className="text-xl font-bold font-serif italic mb-4 line-clamp-2 leading-tight" style={{ color: art.titleColor, fontFamily: art.titleFont }}>{art.title}</h2>
-                                                    <button className="text-[10px] font-black tracking-[0.3em] text-white border-b-2 border-accent pb-1 group-hover:pr-4 transition-all">OKU</button>
+                                                    <h2 className="text-base font-bold font-serif italic mb-4 line-clamp-2 leading-tight" style={{ color: art.titleColor, fontFamily: art.titleFont }}>{art.title}</h2>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[9px] font-black tracking-[0.2em] text-white/50 group-hover:text-accent transition-all">OKU</span>
+                                                        <div className="h-[1px] w-4 bg-accent/30 group-hover:w-8 transition-all"></div>
+                                                    </div>
                                                 </div>
                                             </article>
                                             
                                             {index === 3 && ads.listeOrtasi.active && (
-                                                <div className="col-span-full py-12 border-y border-white/5 my-8">
-                                                    <div className={`text-center text-2xl font-serif italic ${ads.listeOrtasi.effect === 'blink' ? 'animate-blink' : ''}`}
+                                                <div className="col-span-full py-8 border-y border-white/5 my-6">
+                                                    <div className={`text-center text-xl font-serif italic ${ads.listeOrtasi.effect === 'blink' ? 'animate-blink' : ''}`}
                                                          style={{ color: ads.listeOrtasi.color, fontFamily: ads.listeOrtasi.font }}>
                                                         <SafeHTML content={ads.listeOrtasi.content} />
                                                     </div>
@@ -171,51 +190,50 @@
                                     ))}
                                 </div>
 
-                                {/* Sayfalama */}
-                                <div className="flex justify-center mt-20 gap-4">
+                                <div className="flex justify-center mt-16 gap-3">
                                     {[...Array(totalPages)].map((_, i) => (
-                                        <button key={i} onClick={() => setCurrentPage(i+1)} className={`w-10 h-10 rounded-full border border-white/10 text-xs font-bold transition-all ${currentPage === i+1 ? 'bg-white text-black' : 'hover:border-accent'}`}>{i+1}</button>
+                                        <button key={i} onClick={() => setCurrentPage(i+1)} className={`w-8 h-8 rounded border border-white/5 text-[10px] font-bold transition-all ${currentPage === i+1 ? 'bg-accent text-black border-accent' : 'hover:border-accent/50 text-gray-500'}`}>{i+1}</button>
                                     ))}
                                 </div>
                             </main>
                         )}
 
                         {view === 'article' && selectedArticle && (
-                            <main className="max-w-4xl mx-auto p-8 lg:py-20">
-                                <button onClick={() => setView('home')} className="text-accent text-[10px] font-bold tracking-[0.4em] mb-12 block">← GERİ DÖN</button>
+                            <main className="max-w-5xl mx-auto p-6 lg:py-16">
+                                <button onClick={() => setView('home')} className="text-accent text-[9px] font-bold tracking-[0.3em] mb-10 opacity-60 hover:opacity-100">← ANA SAYFA</button>
                                 
-                                <header className="text-center mb-16">
-                                    <div className="text-accent text-[10px] font-black tracking-[0.5em] mb-4 uppercase">{selectedArticle.category}</div>
-                                    <h2 className="text-4xl md:text-6xl font-black italic mb-8 leading-tight" style={{ color: selectedArticle.titleColor, fontFamily: selectedArticle.titleFont }}>{selectedArticle.title}</h2>
-                                    <div className="text-gray-500 text-[10px] font-bold tracking-widest">{selectedArticle.date} — 4 DK OKUMA</div>
+                                <header className="text-center mb-12">
+                                    <div className="text-accent text-[9px] font-black tracking-[0.4em] mb-4 uppercase">{selectedArticle.category}</div>
+                                    <h2 className="text-3xl md:text-5xl font-black italic mb-6 leading-tight max-w-3xl mx-auto" style={{ color: selectedArticle.titleColor, fontFamily: selectedArticle.titleFont }}>{selectedArticle.title}</h2>
+                                    <div className="text-gray-500 text-[9px] font-bold tracking-widest">{selectedArticle.date} — 4 DK</div>
                                 </header>
 
-                                <div className="max-w-3xl mx-auto">
-                                    <img src={selectedArticle.image} className="w-full rounded-2xl shadow-2xl mb-16 border border-white/10" />
+                                <div className="max-w-4xl mx-auto">
+                                    <img src={selectedArticle.image} className="article-hero-img shadow-2xl border border-white/10" />
 
                                     {ads.makaleIci.active && (
-                                        <div className="bg-[#111] p-6 text-center border border-white/5 mb-12 rounded-xl">
-                                            <div className={`text-[11px] tracking-widest uppercase font-bold ${ads.makaleIci.effect === 'blink' ? 'animate-blink' : ''}`}
+                                        <div className="bg-[#0a0a0a] p-5 text-center border border-white/5 mb-12 rounded-lg max-w-2xl mx-auto">
+                                            <div className={`text-[10px] tracking-widest uppercase font-bold ${ads.makaleIci.effect === 'blink' ? 'animate-blink' : ''}`}
                                                  style={{ color: ads.makaleIci.color, fontFamily: ads.makaleIci.font }}>
                                                 <SafeHTML content={ads.makaleIci.content} />
                                             </div>
                                         </div>
                                     )}
 
-                                    <div className="rich-content text-gray-300 leading-relaxed text-lg font-light tracking-wide italic">
+                                    <div className="rich-content text-gray-300 leading-relaxed text-base font-light italic max-w-2xl mx-auto">
                                         <SafeHTML content={selectedArticle.content} />
                                     </div>
 
                                     {/* Benzer İçerikler */}
-                                    <div className="mt-32 pt-16 border-t border-white/5">
-                                        <h4 className="text-[10px] font-black text-accent tracking-[0.5em] uppercase mb-12 text-center">Bunları da Beğenebilirsin</h4>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                    <div className="mt-24 pt-12 border-t border-white/5">
+                                        <h4 className="text-[9px] font-black text-accent tracking-[0.4em] uppercase mb-10 text-center">BUNLARI DA BEĞENEBİLİRSİN</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                             {articles.filter(a => a.id !== selectedArticle.id).slice(0, 3).map(p => (
-                                                <div key={p.id} className="cursor-pointer group" onClick={() => {setSelectedArticle(p); window.scrollTo(0,0);}}>
-                                                    <div className="aspect-video overflow-hidden rounded mb-4">
-                                                        <img src={p.image} className="w-full h-full object-cover group-hover:scale-110 transition duration-700" />
+                                                <div key={p.id} className="cursor-pointer group bg-surface/50 p-3 rounded-lg" onClick={() => {setSelectedArticle(p); window.scrollTo(0,0);}}>
+                                                    <div className="aspect-video overflow-hidden rounded mb-3">
+                                                        <img src={p.image} className="w-full h-full object-cover group-hover:scale-105 transition duration-500 opacity-80" />
                                                     </div>
-                                                    <h5 className="text-xs font-bold font-serif italic group-hover:text-accent transition-colors line-clamp-2">{p.title}</h5>
+                                                    <h5 className="text-[11px] font-bold font-serif italic group-hover:text-accent transition-colors line-clamp-1">{p.title}</h5>
                                                 </div>
                                             ))}
                                         </div>
@@ -225,95 +243,98 @@
                         )}
 
                         {view === 'admin' && (
-                            <main className="max-w-md mx-auto py-40 px-8">
-                                <h2 className="text-2xl font-bold mb-8 gold-text uppercase text-center italic tracking-widest">Sistem Erişimi</h2>
+                            <main className="max-w-sm mx-auto py-32 px-6">
+                                <div className="text-center mb-8">
+                                    <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-accent/20">
+                                        <span className="text-accent text-xl italic">N</span>
+                                    </div>
+                                    <h2 className="text-lg font-bold gold-text uppercase italic tracking-widest">Panel Erişimi</h2>
+                                </div>
                                 <div className="space-y-4">
-                                    <input type="password" placeholder="Şifre" className="admin-input text-center" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && (password === 'pofudukvetekir' ? setView('dashboard') : setLoginError(true))} />
-                                    <button onClick={() => password === 'pofudukvetekir' ? setView('dashboard') : setLoginError(true)} className="w-full bg-accent text-black font-black py-4 rounded-lg text-[10px] tracking-[0.3em]">GİRİŞ YAP</button>
-                                    {loginError && <p className="text-red-500 text-[10px] font-bold text-center uppercase tracking-widest">Yetkisiz Erişim</p>}
+                                    <input type="password" placeholder="Sistem Anahtarı" className="admin-input text-center" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && (password === 'pofudukvetekir' ? setView('dashboard') : setLoginError(true))} />
+                                    <button onClick={() => password === 'pofudukvetekir' ? setView('dashboard') : setLoginError(true)} className="w-full bg-accent text-black font-black py-3 rounded text-[10px] tracking-[0.2em]">GİRİŞ</button>
+                                    {loginError && <p className="text-red-500 text-[9px] font-bold text-center uppercase tracking-widest animate-pulse">Erişim Reddedildi</p>}
                                 </div>
                             </main>
                         )}
 
                         {view === 'dashboard' && (
-                            <main className="max-w-7xl mx-auto p-12">
-                                <div className="flex justify-between items-center mb-12 border-b border-white/10 pb-8">
-                                    <h2 className="text-2xl font-bold gold-text italic tracking-widest uppercase">Kontrol Merkezi</h2>
-                                    <button onClick={() => setView('home')} className="bg-red-950/30 text-red-500 border border-red-500/20 px-6 py-2 rounded text-[10px] font-black tracking-widest">SİTEYE DÖN</button>
+                            <main className="max-w-7xl mx-auto p-8">
+                                <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-6">
+                                    <h2 className="text-xl font-bold gold-text italic tracking-widest uppercase">Kontrol Paneli</h2>
+                                    <button onClick={() => setView('home')} className="text-gray-500 hover:text-white text-[10px] font-black tracking-widest transition-all">PANELİ KAPAT ×</button>
                                 </div>
 
-                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                                    {/* Editör */}
-                                    <div className="lg:col-span-5 space-y-6">
-                                        <div className="bg-surface p-8 rounded-2xl border border-white/5 space-y-4">
-                                            <h3 className="text-[10px] font-black text-accent tracking-[0.4em] uppercase mb-4">Yeni Makale</h3>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <input className="admin-input" placeholder="Başlık" value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
+                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                                    <div className="lg:col-span-4 space-y-6">
+                                        <div className="bg-surface p-6 rounded-xl border border-white/5 space-y-4">
+                                            <h3 className="text-[9px] font-black text-accent tracking-[0.3em] uppercase">Makale Yaz</h3>
+                                            <input className="admin-input" placeholder="Başlık" value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
+                                            <div className="grid grid-cols-2 gap-2">
                                                 <select className="admin-select" value={form.titleFont} onChange={e => setForm({...form, titleFont: e.target.value})}>
-                                                    <option value="Montserrat">Modern Sans</option>
-                                                    <option value="Playfair Display">Serif Italic</option>
-                                                    <option value="Space Mono">Monospace</option>
+                                                    <option value="Montserrat">Modern</option>
+                                                    <option value="Playfair Display">Zarif</option>
+                                                    <option value="Space Mono">Teknik</option>
                                                 </select>
-                                            </div>
-                                            <div className="flex items-center gap-4 py-2">
-                                                <span className="text-[10px] font-bold text-gray-500 uppercase">Renk:</span>
-                                                <input type="color" className="bg-transparent w-full h-8 cursor-pointer" value={form.titleColor} onChange={e => setForm({...form, titleColor: e.target.value})} />
+                                                <input type="color" className="bg-transparent w-full h-10 cursor-pointer" value={form.titleColor} onChange={e => setForm({...form, titleColor: e.target.value})} />
                                             </div>
                                             <input className="admin-input" placeholder="Kategori" value={form.category} onChange={e => setForm({...form, category: e.target.value})} />
-                                            <div className="p-4 border border-dashed border-white/10 rounded-lg">
-                                                <input type="file" className="text-[10px] text-gray-500 w-full" onChange={handleFileUpload} />
-                                                <p className="text-[9px] text-gray-600 mt-2 uppercase">Veya URL:</p>
-                                                <input className="admin-input mt-1 h-8" placeholder="Resim URL" value={form.image} onChange={e => setForm({...form, image: e.target.value})} />
+                                            <div className="p-3 border border-dashed border-white/10 rounded">
+                                                <input type="file" className="text-[9px] text-gray-500 w-full mb-2" onChange={handleFileUpload} />
+                                                <input className="admin-input text-[10px]" placeholder="Resim URL" value={form.image} onChange={e => setForm({...form, image: e.target.value})} />
                                             </div>
-                                            <textarea className="admin-input h-20" placeholder="Kısa Özet" value={form.excerpt} onChange={e => setForm({...form, excerpt: e.target.value})} />
-                                            <textarea className="admin-input h-64 font-mono text-[11px]" placeholder="İçerik (HTML destekli)" value={form.content} onChange={e => setForm({...form, content: e.target.value})} />
-                                            <button onClick={handleSave} className="w-full bg-white text-black font-black p-4 rounded-xl text-[10px] tracking-[0.3em] hover:bg-accent transition-all uppercase">Kaydet ve Yayınla</button>
+                                            <textarea className="admin-input h-48 font-mono text-[10px]" placeholder="HTML İçerik..." value={form.content} onChange={e => setForm({...form, content: e.target.value})} />
+                                            <button onClick={handleSave} className="w-full bg-white text-black font-black p-3 rounded text-[9px] tracking-[0.2em] hover:bg-accent transition-all uppercase">Yayınla</button>
                                         </div>
                                     </div>
 
-                                    {/* Reklam ve Liste */}
-                                    <div className="lg:col-span-7 space-y-8">
-                                        <div className="bg-surface p-8 rounded-2xl border border-white/5">
-                                            <h3 className="text-[10px] font-black text-accent tracking-[0.4em] uppercase mb-8">Reklam Yönetimi</h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                {Object.entries(ads).map(([key, ad]) => (
-                                                    <div key={key} className="space-y-3 p-4 bg-black/30 rounded-xl border border-white/5">
+                                    <div className="lg:col-span-8 space-y-6">
+                                        <div className="bg-surface p-6 rounded-xl border border-white/5">
+                                            <h3 className="text-[9px] font-black text-accent tracking-[0.3em] uppercase mb-6">Reklam & Duyuru</h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {/* Duyuru Özel Alanı */}
+                                                <div className="p-4 bg-black/40 rounded border border-white/5 space-y-2">
+                                                    <span className="text-[8px] font-black text-gray-600 uppercase">Üst Duyuru & Emoji</span>
+                                                    <div className="flex gap-2">
+                                                        <input className="admin-input flex-1" placeholder="Emoji (📢, ✨..)" value={ads.siteUstu.emoji} onChange={e => setAds({...ads, siteUstu: {...ads.siteUstu, emoji: e.target.value}})} />
+                                                        <input type="color" className="h-10 w-10 bg-transparent" value={ads.siteUstu.color} onChange={e => setAds({...ads, siteUstu: {...ads.siteUstu, color: e.target.value}})} />
+                                                    </div>
+                                                    <input className="admin-input" value={ads.siteUstu.content} onChange={e => setAds({...ads, siteUstu: {...ads.siteUstu, content: e.target.value}})} />
+                                                </div>
+
+                                                {Object.entries(ads).filter(([k]) => k !== 'siteUstu').map(([key, ad]) => (
+                                                    <div key={key} className="p-4 bg-black/40 rounded border border-white/5 space-y-2">
                                                         <div className="flex justify-between items-center">
-                                                            <span className="text-[9px] font-black text-gray-500 uppercase">{key.replace(/([A-Z])/g, ' $1')}</span>
+                                                            <span className="text-[8px] font-black text-gray-600 uppercase">{key}</span>
                                                             <input type="checkbox" checked={ad.active} onChange={e => setAds({...ads, [key]: {...ad, active: e.target.checked}})} />
                                                         </div>
-                                                        <textarea className="admin-input h-16 text-[11px]" value={ad.content} onChange={e => setAds({...ads, [key]: {...ad, content: e.target.value}})} />
-                                                        <div className="flex gap-2">
-                                                            <select className="admin-select text-[10px]" value={ad.effect} onChange={e => setAds({...ads, [key]: {...ad, effect: e.target.value}})}>
-                                                                <option value="none">SABİT</option>
-                                                                <option value="scroll">KAYAR</option>
-                                                                <option value="blink">FLAŞ</option>
-                                                            </select>
-                                                            <input type="color" className="bg-transparent h-10 w-12" value={ad.color} onChange={e => setAds({...ads, [key]: {...ad, color: e.target.value}})} />
-                                                        </div>
+                                                        <input className="admin-input text-[10px]" value={ad.content} onChange={e => setAds({...ads, [key]: {...ad, content: e.target.value}})} />
+                                                        <select className="admin-select text-[10px]" value={ad.effect} onChange={e => setAds({...ads, [key]: {...ad, effect: e.target.value}})}>
+                                                            <option value="none">SABİT</option>
+                                                            <option value="blink">FLAŞ</option>
+                                                        </select>
                                                     </div>
                                                 ))}
                                             </div>
                                         </div>
 
-                                        <div className="bg-surface rounded-2xl border border-white/5 overflow-hidden">
-                                            <table className="w-full text-left">
-                                                <thead>
-                                                    <tr className="bg-white/5 text-[9px] font-black uppercase tracking-widest">
-                                                        <th className="p-4">Makale</th>
-                                                        <th className="p-4 text-right">İşlem</th>
+                                        <div className="bg-surface rounded-xl border border-white/5 overflow-hidden">
+                                            <table className="w-full text-left text-[10px]">
+                                                <thead className="bg-white/5 font-black uppercase tracking-widest text-gray-500">
+                                                    <tr>
+                                                        <th className="p-3">Görsel</th>
+                                                        <th className="p-3">Başlık</th>
+                                                        <th className="p-3 text-right">Eylem</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-white/5">
                                                     {articles.map(a => (
-                                                        <tr key={a.id} className="group">
-                                                            <td className="p-4 flex items-center gap-4">
-                                                                <img src={a.image} className="w-10 h-10 object-cover rounded" />
-                                                                <span className="text-xs font-bold">{a.title}</span>
-                                                            </td>
-                                                            <td className="p-4 text-right">
-                                                                <button onClick={() => {setForm(a); setEditMode(true); setCurrentEditId(a.id);}} className="text-accent text-[9px] font-black mr-4 uppercase">Düzenle</button>
-                                                                <button onClick={() => setArticles(articles.filter(x => x.id !== a.id))} className="text-red-500 text-[9px] font-black uppercase">Sil</button>
+                                                        <tr key={a.id} className="hover:bg-white/5 transition-colors">
+                                                            <td className="p-3"><img src={a.image} className="w-8 h-8 object-cover rounded" /></td>
+                                                            <td className="p-3 font-bold">{a.title}</td>
+                                                            <td className="p-3 text-right space-x-3">
+                                                                <button onClick={() => {setForm(a); setEditMode(true); setCurrentEditId(a.id);}} className="text-accent hover:underline">DÜZENLE</button>
+                                                                <button onClick={() => setArticles(articles.filter(x => x.id !== a.id))} className="text-red-800 hover:text-red-500 transition-colors">SİL</button>
                                                             </td>
                                                         </tr>
                                                     ))}
@@ -326,11 +347,9 @@
                         )}
                     </div>
 
-                    {/* Footer Ad */}
                     {ads.siteAlti.active && (
-                        <footer className="bg-black py-6 border-t border-white/5 text-center overflow-hidden">
-                            <div className={`text-[10px] tracking-[0.5em] font-bold uppercase ${ads.siteAlti.effect === 'scroll' ? 'animate-scroll' : ''}`}
-                                 style={{ color: ads.siteAlti.color, fontFamily: ads.siteAlti.font }}>
+                        <footer className="bg-black py-4 border-t border-white/5 text-center">
+                            <div className="text-[8px] tracking-[0.4em] font-bold uppercase text-gray-600">
                                 <SafeHTML content={ads.siteAlti.content} />
                             </div>
                         </footer>
