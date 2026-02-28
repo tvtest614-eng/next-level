@@ -9,20 +9,123 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --surface: #0f0f0f;
+            --accent: #d4af37;
+            --gold-gradient: linear-gradient(135deg, #bf953f 0%, #fcf6ba 45%, #b38728 92%, #aa771c 100%);
+            --border: rgba(255,255,255,0.05);
+        }
+        body { 
+            background-color: var(--bg-color); 
+            color: white; 
+            font-family: 'Montserrat', sans-serif; 
+            margin: 0; 
+            overflow-x: hidden;
+        }
+        .gold-text { 
+            background: var(--gold-gradient); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .ticker-move { 
+            animation: ticker-move 30s linear infinite; 
+        }
+        @keyframes ticker-move { 
+            0% { transform: translateX(0); } 
+            100% { transform: translateX(-100%); } 
+        }
+        .post-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+        .post-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-8px);
+        }
+    </style>
 </head>
-<body class="bg-[#050505]">
+<body>
     <div id="root"></div>
 
-    <!-- React Kodunu Çalıştıran Bölüm -->
     <script type="text/babel">
-        // Buraya index.jsx içindeki kodun aynısını yapıştıracağız.
-        // Şimdilik sistemin çalışması için temel bir yönlendirme yapıyorum.
-        // Eğer index.jsx dosyan yüklüyse, GitHub Pages bunu otomatik algılayacaktır.
-        // Ancak en garantisi, index.jsx içindeki tüm kodları kopyalayıp buraya, 
-        // bu yorum satırının altına yapıştırmaktır.
+        const { useState, useEffect } = React;
+
+        function App() {
+            return (
+                <div className="min-h-screen">
+                    {/* Header Section */}
+                    <header className="py-12 border-b border-white/5 text-center bg-black/80 backdrop-blur-xl sticky top-0 z-50">
+                        <h1 className="text-6xl font-serif font-black italic gold-text tracking-tighter leading-none">Next Level</h1>
+                        <p className="text-[10px] tracking-[0.6em] uppercase text-gray-500 mt-4 font-bold">Premium Digital Archive System</p>
+                    </header>
+
+                    {/* Haber Bandı */}
+                    <div className="bg-black py-4 border-b border-white/5 overflow-hidden whitespace-nowrap">
+                        <div className="inline-block ticker-move text-accent text-[11px] font-bold uppercase tracking-widest">
+                            NEXT LEVEL GLOBAL — PREMIUM HABER DENEYİMİ — YENİ NESİL DİJİTAL YAYINCILIK — STRATEJİK ANALİZ — &nbsp;&nbsp;
+                            NEXT LEVEL GLOBAL — PREMIUM HABER DENEYİMİ — YENİ NESİL DİJİTAL YAYINCILIK — STRATEJİK ANALİZ — &nbsp;&nbsp;
+                        </div>
+                    </div>
+
+                    {/* Ana İçerik */}
+                    <main className="max-w-6xl mx-auto p-10">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                            
+                            <article className="post-card group cursor-pointer">
+                                <div className="aspect-video overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000" />
+                                </div>
+                                <div className="p-8">
+                                    <div className="text-accent text-[9px] font-bold uppercase tracking-widest mb-3">Teknoloji & Estetik</div>
+                                    <h2 className="text-3xl font-bold font-serif mb-4 group-hover:text-accent transition-colors italic">DİJİTAL ESTETİĞİN EVRİMİ</h2>
+                                    <p className="text-gray-500 text-sm leading-relaxed mb-6">Yapay zekanın tasarım süreçlerine entegrasyonu, görsel dünyamızı kökten değiştiriyor. Minimalizmin ötesine geçiyoruz.</p>
+                                    <div className="pt-6 border-t border-white/5 flex justify-between items-center text-[10px] text-gray-600 font-bold uppercase">
+                                        <span>MART 2026</span>
+                                        <span className="text-accent">DEVAMINI OKU</span>
+                                    </div>
+                                </div>
+                            </article>
+
+                            <article className="post-card group cursor-pointer">
+                                <div className="aspect-video overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1000" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000" />
+                                </div>
+                                <div className="p-8">
+                                    <div className="text-accent text-[9px] font-bold uppercase tracking-widest mb-3">Siber Güvenlik</div>
+                                    <h2 className="text-3xl font-bold font-serif mb-4 group-hover:text-accent transition-colors italic">KUANTUM İŞLEMCİLER</h2>
+                                    <p className="text-gray-500 text-sm leading-relaxed mb-6">Siber güvenlik dünyası, kuantum sıçramasına hazırlanıyor. Veri şifreleme standartları yeniden yazılıyor.</p>
+                                    <div className="pt-6 border-t border-white/5 flex justify-between items-center text-[10px] text-gray-600 font-bold uppercase">
+                                        <span>ŞUBAT 2026</span>
+                                        <span className="text-accent">DEVAMINI OKU</span>
+                                    </div>
+                                </div>
+                            </article>
+
+                        </div>
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="py-24 border-t border-white/5 text-center bg-black/50">
+                        <div className="gold-text font-serif font-bold text-2xl mb-6 italic">Next Level Global</div>
+                        <div className="flex justify-center gap-10 mb-10 text-[10px] font-bold text-gray-600 tracking-[0.3em] uppercase">
+                            <a href="#" className="hover:text-accent transition-colors">Arşiv</a>
+                            <a href="#" className="hover:text-accent transition-colors">İletişim</a>
+                            <a href="#" className="hover:text-accent transition-colors">Hakkımızda</a>
+                        </div>
+                        <p className="text-[9px] tracking-[0.5em] text-gray-800">© 2026 SUPREME ARCHIVE — ALL RIGHTS RESERVED</p>
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
-    
-    <!-- Alternatif: Eğer siteyi sadece önizlemek istersen preview.html içeriğini buraya koyabilirsin -->
 </body>
 </html>
