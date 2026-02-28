@@ -30,26 +30,28 @@
             -webkit-background-clip: text; 
             -webkit-text-fill-color: transparent; 
         }
-        .ticker-move { 
-            animation: ticker-move 30s linear infinite; 
-        }
+        
         @keyframes ticker-move { 
             0% { transform: translateX(0); } 
             100% { transform: translateX(-100%); } 
         }
+        .ticker-container:hover .ticker-content {
+            animation-play-state: paused;
+        }
+
         .post-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 20px;
+            border-radius: 15px;
             overflow: hidden;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .post-card:hover {
             border-color: var(--accent);
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
         }
-        /* Custom scrollbar */
+        
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #050505; }
         ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
@@ -63,10 +65,25 @@
             border-radius: 8px;
             color: white;
             outline: none;
-            font-size: 14px;
+            font-size: 13px;
         }
-        .admin-input:focus {
-            border-color: var(--accent);
+        .admin-input:focus { border-color: var(--accent); }
+
+        .pagination-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--accent);
+            color: black;
+        }
+        .pagination-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -74,55 +91,65 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useMemo } = React;
 
         function App() {
             const [view, setView] = useState('home'); 
             const [selectedArticle, setSelectedArticle] = useState(null);
             const [password, setPassword] = useState('');
             const [loginError, setLoginError] = useState(false);
+            const [currentPage, setCurrentPage] = useState(1);
+            const postsPerPage = 12; // 3 satır x 4 sütun
             
-            // Site Dinamik Verileri
-            const [tickerText, setTickerText] = useState("NEXT LEVEL GLOBAL — YENİ NESİL DİJİTAL YAYINCILIK — STRATEJİK ANALİZ — PREMIUM DENEYİM — ");
-            const [ads, setAds] = useState({
-                top: { active: true, content: "PREMIUM ÜYELİK ŞİMDİ AKTİF" },
-                side: { active: true, content: "SINIRLI SAYIDA NFT KOLEKSİYONU" }
+            // Site Dinamik Verileri (Admin Kontrollü)
+            const [tickerConfig, setTickerConfig] = useState({
+                text: "NEXT LEVEL GLOBAL — PREMIUM HABER — STRATEJİK ANALİZ — ",
+                bgColor: "#0a0a0a",
+                textColor: "#d4af37",
+                speed: 30,
+                fontSize: 10,
+                fontWeight: "800",
+                emoji: "✨"
             });
 
-            // Haber Verileri
+            const [ads, setAds] = useState({
+                top: { active: true, content: "PREMIUM ANALİZLER ŞİMDİ YAYINDA" },
+                bottom: { active: true, content: "BÜLTENİMİZE ABONE OLUN - %20 İNDİRİM" },
+                midList: { active: true, content: "ÖZEL SPONSORLU İÇERİK: GELECEĞİN TEKNOLOJİSİ" },
+                articleIn: { active: true, content: "BU MAKALE NEXT LEVEL PREMIUM DESTEĞİYLE HAZIRLANMIŞTIR" }
+            });
+
+            // Örnek Haber Verileri (Grid testi için çoğaltıldı)
             const [articles, setArticles] = useState([
-                {
-                    id: 1,
-                    category: "Teknoloji & Estetik",
-                    title: "DİJİTAL ESTETİĞİN EVRİMİ",
-                    date: "MART 2026",
-                    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000",
-                    excerpt: "Yapay zekanın tasarım süreçlerine entegrasyonu, görsel dünyamızı kökten değiştiriyor. Minimalizmin ötesine geçiyoruz.",
-                    content: "Dijital tasarımın geleceği artık sadece piksellerle değil, algoritmalarla şekilleniyor. Yapay zeka, tasarımcının yerini almaktan ziyade ona sınırsız bir fırça sunuyor..."
-                },
-                {
-                    id: 2,
-                    category: "Siber Güvenlik",
-                    title: "KUANTUM İŞLEMCİLER",
-                    date: "ŞUBAT 2026",
-                    image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1000",
-                    excerpt: "Siber güvenlik dünyası, kuantum sıçramasına hazırlanıyor. Veri şifreleme standartları yeniden yazılıyor.",
-                    content: "Kuantum bilgisayarların işlem gücü, bugünkü en karmaşık şifreleme yöntemlerini saniyeler içinde çözebilir hale geldi..."
-                }
+                { id: 1, category: "Gelecek", title: "DİJİTAL ESTETİĞİN EVRİMİ", date: "MART 2026", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800", excerpt: "Yapay zekanın tasarım süreçlerine entegrasyonu görsel dünyamızı değiştiriyor.", content: "Dijital tasarımın geleceği artık sadece piksellerle değil, algoritmalarla şekilleniyor..." },
+                { id: 2, category: "Siber", title: "KUANTUM İŞLEMCİLER", date: "ŞUBAT 2026", image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800", excerpt: "Siber güvenlik dünyası kuantum sıçramasına hazırlanıyor.", content: "Kuantum bilgisayarların işlem gücü bugünkü şifreleri saniyeler içinde çözebilir..." },
+                { id: 3, category: "Ekonomi", title: "KRİPTO VARLIK YÖNETİMİ", date: "ŞUBAT 2026", image: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=800", excerpt: "Yeni nesil varlık yönetimi ve blokzincir entegrasyonu.", content: "Finans dünyası merkeziyetsizliğe doğru evriliyor..." },
+                { id: 4, category: "Mimari", title: "EKO-ŞEHİRLERİN YÜKSELİŞİ", date: "OCAK 2026", image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800", excerpt: "Sürdürülebilir yaşam alanlarında yeni bir dönem.", content: "Doğa ile teknolojinin uyumu mimariyi baştan yazıyor..." },
+                // Grid testi için kopya veriler
+                ...Array.from({length: 10}, (_, i) => ({
+                    id: i + 5,
+                    category: "Arşiv",
+                    title: `ARŞİV ANALİZİ #${i + 5}`,
+                    date: "ARALIK 2025",
+                    image: `https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&sig=${i}`,
+                    excerpt: "Geçmişten günümüze teknolojik gelişmelerin analizi.",
+                    content: "Bu içerik arşiv kayıtlarından otomatik olarak yüklenmiştir."
+                }))
             ]);
 
-            // Editör State'i
-            const [editMode, setEditMode] = useState(false); // false ise ekleme, true ise düzenleme
+            const [editMode, setEditMode] = useState(false);
             const [currentEditId, setCurrentEditId] = useState(null);
             const [form, setForm] = useState({ title: '', category: '', excerpt: '', content: '', image: '' });
 
+            // Sayfalama Mantığı
+            const indexOfLastPost = currentPage * postsPerPage;
+            const indexOfFirstPost = indexOfLastPost - postsPerPage;
+            const currentArticles = articles.slice(indexOfFirstPost, indexOfLastPost);
+            const totalPages = Math.ceil(articles.length / postsPerPage);
+
             const handleLogin = () => {
-                if (password === 'pofudukvetekir') {
-                    setView('dashboard');
-                    setLoginError(false);
-                } else {
-                    setLoginError(true);
-                }
+                if (password === 'pofudukvetekir') { setView('dashboard'); setLoginError(false); }
+                else { setLoginError(true); }
             };
 
             const handleSaveArticle = () => {
@@ -141,75 +168,115 @@
                 setCurrentEditId(null);
             };
 
-            const startEdit = (article) => {
-                setForm({ title: article.title, category: article.category, excerpt: article.excerpt, content: article.content, image: article.image });
-                setEditMode(true);
-                setCurrentEditId(article.id);
-            };
-
-            const deleteArticle = (id) => {
-                if(confirm('Bu makaleyi silmek istediğinize emin misiniz?')) {
-                    setArticles(articles.filter(a => a.id !== id));
-                }
-            };
-
             return (
                 <div className="min-h-screen flex flex-col">
                     {/* Header */}
-                    <header className="py-6 border-b border-white/5 text-center bg-black/80 backdrop-blur-xl sticky top-0 z-50">
-                        <div className="cursor-pointer" onClick={() => setView('home')}>
+                    <header className="py-6 border-b border-white/5 text-center bg-black/90 backdrop-blur-xl sticky top-0 z-50">
+                        <div className="cursor-pointer" onClick={() => {setView('home'); setCurrentPage(1);}}>
                             <h1 className="text-4xl font-serif font-black italic gold-text tracking-tighter leading-none">Next Level</h1>
                             <p className="text-[8px] tracking-[0.6em] uppercase text-gray-500 mt-2 font-bold">Premium Digital Archive</p>
                         </div>
                     </header>
 
-                    {/* Reklam Alanı (Top) */}
+                    {/* Reklam Alanı (Üst) */}
                     {ads.top.active && view === 'home' && (
-                        <div className="bg-accent/10 border-b border-accent/20 py-2 text-center text-[10px] font-bold tracking-[0.3em] text-accent">
-                            AD: {ads.top.content}
+                        <div className="bg-accent/5 border-b border-accent/10 py-3 text-center text-[10px] font-bold tracking-[0.4em] text-accent uppercase">
+                            {ads.top.content}
                         </div>
                     )}
 
-                    {/* News Ticker */}
-                    <div className="bg-black py-3 border-b border-white/5 overflow-hidden whitespace-nowrap">
-                        <div className="inline-block ticker-move text-accent text-[10px] font-bold uppercase tracking-widest">
-                            {tickerText} &nbsp;&nbsp; {tickerText}
+                    {/* Dinamik Duyuru Bandı */}
+                    <div 
+                        className="overflow-hidden whitespace-nowrap py-3 border-b border-white/5 ticker-container"
+                        style={{ backgroundColor: tickerConfig.bgColor }}
+                    >
+                        <div 
+                            className="inline-block ticker-content uppercase tracking-widest"
+                            style={{ 
+                                animation: `ticker-move ${tickerConfig.speed}s linear infinite`,
+                                color: tickerConfig.textColor,
+                                fontSize: `${tickerConfig.fontSize}px`,
+                                fontWeight: tickerConfig.fontWeight
+                            }}
+                        >
+                            {[1,2,3,4].map(i => (
+                                <span key={i}>
+                                    {tickerConfig.emoji} {tickerConfig.text} &nbsp;&nbsp;&nbsp;&nbsp;
+                                </span>
+                            ))}
                         </div>
                     </div>
 
                     <div className="flex-grow">
                         {view === 'home' && (
-                            <main className="max-w-6xl mx-auto p-8 lg:p-12 animate-in fade-in duration-500">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                                    {articles.map(art => (
-                                        <article key={art.id} className="post-card group">
-                                            <div className="aspect-video overflow-hidden">
-                                                <img src={art.image} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105" />
-                                            </div>
-                                            <div className="p-8">
-                                                <div className="text-accent text-[9px] font-bold uppercase tracking-widest mb-3">{art.category}</div>
-                                                <h2 className="text-2xl font-bold font-serif mb-4 group-hover:text-accent transition-colors italic">{art.title}</h2>
-                                                <p className="text-gray-500 text-sm leading-relaxed mb-6 line-clamp-2">{art.excerpt}</p>
-                                                <div className="pt-6 border-t border-white/5 flex justify-between items-center text-[10px] text-gray-400 font-bold uppercase">
-                                                    <span>{art.date}</span>
-                                                    <button onClick={() => {setSelectedArticle(art); setView('article'); window.scrollTo(0,0);}} className="text-accent hover:tracking-widest transition-all duration-300">
-                                                        DEVAMINI OKU →
-                                                    </button>
+                            <main className="max-w-[1400px] mx-auto p-8 lg:p-12 animate-in fade-in duration-700">
+                                {/* 4'lü Grid Yapısı */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    {currentArticles.map((art, index) => (
+                                        <React.Fragment key={art.id}>
+                                            <article className="post-card group">
+                                                <div className="aspect-[4/3] overflow-hidden">
+                                                    <img src={art.image} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110" />
                                                 </div>
-                                            </div>
-                                        </article>
+                                                <div className="p-6">
+                                                    <div className="text-accent text-[8px] font-bold uppercase tracking-widest mb-2">{art.category}</div>
+                                                    <h2 className="text-lg font-bold font-serif mb-3 group-hover:text-accent transition-colors italic leading-tight line-clamp-2">{art.title}</h2>
+                                                    <p className="text-gray-500 text-[11px] leading-relaxed mb-4 line-clamp-2">{art.excerpt}</p>
+                                                    <div className="pt-4 border-t border-white/5 flex justify-between items-center text-[9px] text-gray-400 font-bold">
+                                                        <span>{art.date}</span>
+                                                        <button onClick={() => {setSelectedArticle(art); setView('article'); window.scrollTo(0,0);}} className="text-accent hover:tracking-widest transition-all">
+                                                            OKU →
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </article>
+                                            
+                                            {/* Liste İçi Reklam (4. makaleden sonra) */}
+                                            {index === 3 && ads.midList.active && (
+                                                <div className="col-span-full bg-white/5 border border-white/10 p-10 rounded-2xl text-center my-4">
+                                                    <span className="text-[10px] text-gray-500 tracking-[0.5em] block mb-2 uppercase font-bold">SPONSORLU</span>
+                                                    <h3 className="text-xl font-serif italic text-white/80">{ads.midList.content}</h3>
+                                                </div>
+                                            )}
+                                        </React.Fragment>
                                     ))}
                                 </div>
+
+                                {/* Sayfalama Kontrolleri */}
+                                {totalPages > 1 && (
+                                    <div className="flex justify-center items-center gap-4 mt-16">
+                                        <button 
+                                            disabled={currentPage === 1}
+                                            onClick={() => {setCurrentPage(p => p - 1); window.scrollTo(0,0);}}
+                                            className="pagination-btn"
+                                        >ÖNCEKİ</button>
+                                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                            Sayfa {currentPage} / {totalPages}
+                                        </span>
+                                        <button 
+                                            disabled={currentPage === totalPages}
+                                            onClick={() => {setCurrentPage(p => p + 1); window.scrollTo(0,0);}}
+                                            className="pagination-btn"
+                                        >SONRAKİ</button>
+                                    </div>
+                                )}
                             </main>
                         )}
 
                         {view === 'article' && selectedArticle && (
                             <main className="max-w-3xl mx-auto p-8 lg:py-20 animate-in slide-in-from-bottom-10 duration-700">
-                                <button onClick={() => setView('home')} className="text-accent text-[10px] font-bold tracking-widest mb-10 block">← GERİ DÖN</button>
+                                <button onClick={() => setView('home')} className="text-accent text-[10px] font-bold tracking-widest mb-10 block">← ARŞİVE DÖN</button>
+                                
+                                {ads.articleIn.active && (
+                                    <div className="mb-10 text-[9px] text-center border-b border-accent/20 pb-4 text-gray-500 italic tracking-widest uppercase">
+                                        {ads.articleIn.content}
+                                    </div>
+                                )}
+
                                 <div className="text-accent text-xs font-bold uppercase tracking-widest mb-4">{selectedArticle.category}</div>
                                 <h2 className="text-5xl font-black font-serif italic mb-8 leading-tight">{selectedArticle.title}</h2>
-                                <img src={selectedArticle.image} className="w-full rounded-3xl mb-12 shadow-2xl border border-white/5" />
-                                <div className="text-gray-400 leading-[2] text-lg space-y-6">
+                                <img src={selectedArticle.image} className="w-full rounded-2xl mb-12 shadow-2xl border border-white/5" />
+                                <div className="text-gray-400 leading-[2] text-lg space-y-6 first-letter:text-5xl first-letter:font-serif first-letter:text-accent first-letter:float-left first-letter:mr-3">
                                     <p>{selectedArticle.content}</p>
                                 </div>
                             </main>
@@ -217,90 +284,127 @@
 
                         {view === 'admin' && (
                             <main className="max-w-xl mx-auto p-20 text-center animate-in zoom-in-95 duration-500">
-                                <h2 className="text-2xl font-bold mb-8 gold-text uppercase tracking-tighter italic">Sistem Erişimi</h2>
+                                <h2 className="text-2xl font-bold mb-8 gold-text uppercase tracking-tighter italic">Erişim Paneli</h2>
                                 <div className="space-y-4">
                                     <input 
                                         type="password" 
-                                        placeholder="Erişim Anahtarı" 
+                                        placeholder="Güvenlik Anahtarı" 
                                         className={`admin-input text-center ${loginError ? 'border-red-500' : ''}`}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                                     />
-                                    {loginError && <p className="text-red-500 text-[10px] font-bold">Hatalı Anahtar</p>}
-                                    <button onClick={handleLogin} className="w-full bg-accent text-black font-bold p-4 rounded-xl hover:bg-white transition-colors uppercase text-xs tracking-widest">Sisteme Bağlan</button>
-                                    <button onClick={() => setView('home')} className="text-gray-600 text-[10px] mt-4 block mx-auto hover:text-white uppercase tracking-widest">İptal</button>
+                                    <button onClick={handleLogin} className="w-full bg-accent text-black font-bold p-4 rounded-xl hover:bg-white transition-all uppercase text-xs tracking-widest">Giriş Yap</button>
+                                    <button onClick={() => setView('home')} className="text-gray-600 text-[10px] mt-4 block mx-auto hover:text-white uppercase tracking-widest transition-colors">Vazgeç</button>
                                 </div>
                             </main>
                         )}
 
                         {view === 'dashboard' && (
-                            <main className="max-w-6xl mx-auto p-12 animate-in fade-in duration-500 pb-32">
-                                <div className="flex justify-between items-center mb-12 border-b border-white/5 pb-6">
-                                    <h2 className="text-2xl font-bold gold-text italic font-serif">Yönetim Paneli</h2>
-                                    <button onClick={() => {setView('home'); setPassword('');}} className="bg-white/5 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest">Çıkış Yap</button>
+                            <main className="max-w-7xl mx-auto p-8 lg:p-12 animate-in fade-in duration-500 pb-32">
+                                <div className="flex justify-between items-center mb-10 border-b border-white/5 pb-6">
+                                    <h2 className="text-2xl font-bold gold-text italic font-serif uppercase tracking-tighter">Yönetim / Dashboard</h2>
+                                    <button onClick={() => {setView('home'); setPassword('');}} className="bg-white/5 hover:bg-red-900/20 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all">Güvenli Çıkış</button>
                                 </div>
 
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                                    {/* Makale Formu */}
-                                    <div className="lg:col-span-1 space-y-4 bg-surface p-6 rounded-2xl border border-white/5 h-fit">
-                                        <h3 className="text-xs font-bold uppercase text-accent tracking-widest mb-4">{editMode ? 'Makaleyi Düzenle' : 'Yeni Makale'}</h3>
+                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                                    {/* Makale Editörü */}
+                                    <div className="lg:col-span-4 space-y-4 bg-surface p-6 rounded-2xl border border-white/5 h-fit shadow-xl">
+                                        <h3 className="text-[10px] font-bold uppercase text-accent tracking-[0.3em] mb-4">{editMode ? 'İçeriği Güncelle' : 'Yeni İçerik Ekle'}</h3>
                                         <input className="admin-input" placeholder="Başlık" value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
                                         <input className="admin-input" placeholder="Kategori" value={form.category} onChange={e => setForm({...form, category: e.target.value})} />
                                         <input className="admin-input" placeholder="Görsel URL" value={form.image} onChange={e => setForm({...form, image: e.target.value})} />
-                                        <textarea className="admin-input h-24" placeholder="Kısa Özet" value={form.excerpt} onChange={e => setForm({...form, excerpt: e.target.value})} />
-                                        <textarea className="admin-input h-48" placeholder="Makale İçeriği" value={form.content} onChange={e => setForm({...form, content: e.target.value})} />
-                                        <div className="flex gap-2">
-                                            <button onClick={handleSaveArticle} className="flex-grow bg-accent text-black font-bold p-3 rounded-xl text-[10px] uppercase">KAYDET</button>
-                                            {editMode && <button onClick={resetForm} className="bg-white/10 p-3 rounded-xl text-[10px]">İPTAL</button>}
+                                        <textarea className="admin-input h-20" placeholder="Kısa Özet" value={form.excerpt} onChange={e => setForm({...form, excerpt: e.target.value})} />
+                                        <textarea className="admin-input h-40" placeholder="Tam Metin" value={form.content} onChange={e => setForm({...form, content: e.target.value})} />
+                                        <div className="flex gap-2 pt-2">
+                                            <button onClick={handleSaveArticle} className="flex-grow bg-white text-black hover:bg-accent font-black p-3 rounded-xl text-[11px] uppercase tracking-widest shadow-[0_0_20px_rgba(212,175,55,0.2)] transition-all">
+                                                {editMode ? 'DEĞİŞİKLİKLERİ KAYDET' : 'MAKALE YAYINLA'}
+                                            </button>
+                                            {editMode && <button onClick={resetForm} className="bg-white/10 p-3 rounded-xl text-[10px] font-bold">İPTAL</button>}
                                         </div>
                                     </div>
 
-                                    {/* Liste ve Diğer Ayarlar */}
-                                    <div className="lg:col-span-2 space-y-10">
-                                        {/* Duyuru ve Reklam Ayarları */}
-                                        <div className="bg-surface p-6 rounded-2xl border border-white/5 grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div>
-                                                <h4 className="text-[10px] font-bold text-gray-500 uppercase mb-4 tracking-widest">Duyuru Çubuğu</h4>
-                                                <textarea 
-                                                    className="admin-input text-xs" 
-                                                    value={tickerText} 
-                                                    onChange={e => setTickerText(e.target.value)}
-                                                />
+                                    {/* Sistem ve Reklam Ayarları */}
+                                    <div className="lg:col-span-8 space-y-8">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {/* Duyuru Ayarları */}
+                                            <div className="bg-surface p-6 rounded-2xl border border-white/5">
+                                                <h4 className="text-[10px] font-bold text-gray-500 uppercase mb-4 tracking-widest border-b border-white/5 pb-2">Duyuru Paneli Özelleştirme</h4>
+                                                <div className="space-y-4">
+                                                    <div>
+                                                        <label className="text-[9px] text-gray-500 uppercase font-bold block mb-1">Duyuru Metni</label>
+                                                        <input className="admin-input text-xs" value={tickerConfig.text} onChange={e => setTickerConfig({...tickerConfig, text: e.target.value})} />
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <div>
+                                                            <label className="text-[9px] text-gray-500 uppercase font-bold block mb-1">Zemin Rengi</label>
+                                                            <input type="color" className="w-full h-8 rounded bg-transparent border-none cursor-pointer" value={tickerConfig.bgColor} onChange={e => setTickerConfig({...tickerConfig, bgColor: e.target.value})} />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-[9px] text-gray-500 uppercase font-bold block mb-1">Yazı Rengi</label>
+                                                            <input type="color" className="w-full h-8 rounded bg-transparent border-none cursor-pointer" value={tickerConfig.textColor} onChange={e => setTickerConfig({...tickerConfig, textColor: e.target.value})} />
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-3 gap-2">
+                                                        <div>
+                                                            <label className="text-[9px] text-gray-500 uppercase font-bold block mb-1">Hız (sn)</label>
+                                                            <input type="number" className="admin-input py-1 text-center" value={tickerConfig.speed} onChange={e => setTickerConfig({...tickerConfig, speed: e.target.value})} />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-[9px] text-gray-500 uppercase font-bold block mb-1">Boyut</label>
+                                                            <input type="number" className="admin-input py-1 text-center" value={tickerConfig.fontSize} onChange={e => setTickerConfig({...tickerConfig, fontSize: e.target.value})} />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-[9px] text-gray-500 uppercase font-bold block mb-1">Emoji</label>
+                                                            <input className="admin-input py-1 text-center" value={tickerConfig.emoji} onChange={e => setTickerConfig({...tickerConfig, emoji: e.target.value})} />
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="space-y-4">
-                                                <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Reklam Alanları</h4>
-                                                <div className="flex items-center gap-2">
-                                                    <input type="checkbox" checked={ads.top.active} onChange={e => setAds({...ads, top: {...ads.top, active: e.target.checked}})} />
-                                                    <input className="admin-input text-xs py-1" value={ads.top.content} onChange={e => setAds({...ads, top: {...ads.top, content: e.target.value}})} />
+
+                                            {/* Reklam Alanları Yönetimi */}
+                                            <div className="bg-surface p-6 rounded-2xl border border-white/5">
+                                                <h4 className="text-[10px] font-bold text-gray-500 uppercase mb-4 tracking-widest border-b border-white/5 pb-2">Reklam (Ad) Yönetimi</h4>
+                                                <div className="space-y-3">
+                                                    {Object.keys(ads).map(key => (
+                                                        <div key={key} className="flex flex-col gap-1 border-b border-white/5 pb-2 last:border-0">
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="text-[9px] font-bold text-gray-400 uppercase">{key.replace(/([A-Z])/g, ' $1')}</span>
+                                                                <input type="checkbox" checked={ads[key].active} onChange={e => setAds({...ads, [key]: {...ads[key], active: e.target.checked}})} />
+                                                            </div>
+                                                            <input className="admin-input py-1 text-[11px]" value={ads[key].content} onChange={e => setAds({...ads, [key]: {...ads[key], content: e.target.value}})} />
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {/* Makale Listesi */}
-                                        <div className="bg-surface rounded-2xl border border-white/5 overflow-hidden">
-                                            <table className="w-full text-left text-sm">
-                                                <thead className="bg-white/5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                                                    <tr>
-                                                        <th className="p-4">Makale</th>
-                                                        <th className="p-4 text-right">İşlemler</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {articles.map(a => (
-                                                        <tr key={a.id} className="border-t border-white/5 hover:bg-white/5 transition-colors">
-                                                            <td className="p-4">
-                                                                <div className="font-bold">{a.title}</div>
-                                                                <div className="text-[10px] text-gray-500 uppercase tracking-widest">{a.category}</div>
-                                                            </td>
-                                                            <td className="p-4 text-right space-x-4 font-bold text-[10px] tracking-widest">
-                                                                <button onClick={() => startEdit(a)} className="text-accent hover:text-white uppercase">Düzenle</button>
-                                                                <button onClick={() => deleteArticle(a.id)} className="text-red-800 hover:text-red-500 uppercase">Sil</button>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
+                                        {/* İçerik Listesi */}
+                                        <div className="bg-surface rounded-2xl border border-white/5 overflow-hidden shadow-2xl">
+                                            <div className="p-4 bg-white/5 font-bold text-[10px] uppercase tracking-[0.4em] text-gray-500">Yayınlanmış İçerikler ({articles.length})</div>
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full text-left text-xs">
+                                                    <tbody className="divide-y divide-white/5">
+                                                        {articles.map(a => (
+                                                            <tr key={a.id} className="hover:bg-white/[0.02] transition-colors group">
+                                                                <td className="p-4 flex items-center gap-3">
+                                                                    <img src={a.image} className="w-10 h-10 rounded object-cover grayscale group-hover:grayscale-0" />
+                                                                    <div>
+                                                                        <div className="font-bold text-white/90">{a.title}</div>
+                                                                        <div className="text-[9px] text-gray-600 uppercase tracking-widest">{a.category}</div>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="p-4 text-right">
+                                                                    <div className="flex justify-end gap-3 opacity-60 group-hover:opacity-100 transition-opacity">
+                                                                        <button onClick={() => {startEdit(a); window.scrollTo(0,0);}} className="text-accent hover:underline text-[10px] font-bold uppercase">Düzenle</button>
+                                                                        <button onClick={() => {if(confirm('Silinsin mi?')) setArticles(articles.filter(x => x.id !== a.id))}} className="text-red-800 hover:text-red-500 text-[10px] font-bold uppercase">Sil</button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -309,14 +413,19 @@
                     </div>
 
                     {/* Footer */}
-                    <footer className="py-10 border-t border-white/5 text-center bg-black/40">
-                        <div className="gold-text font-serif font-bold text-lg mb-4 italic tracking-tight">Next Level Global</div>
-                        <div className="flex justify-center gap-8 mb-6 text-[9px] font-bold text-gray-600 tracking-[0.2em] uppercase">
+                    {ads.bottom.active && view === 'home' && (
+                        <div className="bg-white/5 border-t border-white/5 py-4 text-center text-[11px] font-bold tracking-[0.5em] text-gray-400 uppercase">
+                            {ads.bottom.content}
+                        </div>
+                    )}
+                    <footer className="py-12 border-t border-white/5 text-center bg-black">
+                        <div className="gold-text font-serif font-bold text-xl mb-4 italic tracking-tight">Next Level Global</div>
+                        <div className="flex justify-center gap-10 mb-8 text-[10px] font-bold text-gray-600 tracking-[0.2em] uppercase">
                             <button onClick={() => setView('home')} className="hover:text-accent transition-colors">Arşiv</button>
                             <button onClick={() => setView('admin')} className="hover:text-accent transition-colors">Panel</button>
-                            <a href="#" className="hover:text-accent transition-colors">Gizlilik</a>
+                            <a href="#" className="hover:text-accent transition-colors">Yasal</a>
                         </div>
-                        <p className="text-[8px] tracking-[0.4em] text-gray-800">© 2026 SUPREME ARCHIVE — ALL RIGHTS RESERVED</p>
+                        <p className="text-[8px] tracking-[0.5em] text-gray-800">© 2026 SUPREME ARCHIVE — ALL RIGHTS RESERVED</p>
                     </footer>
                 </div>
             );
