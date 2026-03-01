@@ -84,10 +84,6 @@
                     speed: 20,
                     isBlinking: false,
                     color: "#d4af37"
-                },
-                ads: {
-                    header: { active: true, code: "<div style='text-align:center; padding:10px; color:#333; font-size:10px;'>REKLAM ALANI</div>" },
-                    footer: { active: false, code: "" }
                 }
             });
 
@@ -123,7 +119,7 @@
             return (
                 <div className="flex flex-col min-h-screen">
                     
-                    {/* DUYURU BAR - DİNAMİK KONTROL */}
+                    {/* DUYURU BAR */}
                     <div className="fixed top-0 left-0 z-50 w-full h-12 flex items-center bg-black/90 border-b border-white/5 backdrop-blur-md">
                         <div className={`bg-accent px-4 h-full flex items-center z-20 shadow-xl ${settings.announcement.isBlinking ? 'animate-blink' : ''}`}>
                             <span className="text-black font-black text-[11px] tracking-tighter whitespace-nowrap">
@@ -171,7 +167,6 @@
                                 <h2 className="text-4xl md:text-6xl font-serif font-black italic mb-6 leading-tight">{selectedArticle.title}</h2>
                                 <p className="text-gray-600 text-[10px]">{selectedArticle.date}</p>
                             </div>
-                            {/* ÖNEMLİ: Kapak resmi burada bilerek kaldırıldı */}
                             <div className="article-body text-gray-300 leading-relaxed text-lg font-light max-w-2xl mx-auto">
                                 <RenderHTML html={selectedArticle.content} />
                             </div>
@@ -193,7 +188,7 @@
                                 <h2 className="text-2xl font-black gold-text italic">Duyuru & Sistem</h2>
                                 <div className="bg-surface p-6 rounded-xl border border-white/5 space-y-4">
                                     <div className="grid grid-cols-2 gap-3">
-                                        <input className="admin-field" placeholder="Başlık (örn: SON DAKİKA)" value={settings.announcement.label} onChange={e => setSettings({...settings, announcement: {...settings.announcement, label: e.target.value}})} />
+                                        <input className="admin-field" placeholder="Başlık" value={settings.announcement.label} onChange={e => setSettings({...settings, announcement: {...settings.announcement, label: e.target.value}})} />
                                         <input className="admin-field" placeholder="Emoji" value={settings.announcement.emoji} onChange={e => setSettings({...settings, announcement: {...settings.announcement, emoji: e.target.value}})} />
                                     </div>
                                     <textarea className="admin-field h-20" value={settings.announcement.text} onChange={e => setSettings({...settings, announcement: {...settings.announcement, text: e.target.value}})} />
