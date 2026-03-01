@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Next Level | Full Feature Recovery</title>
+    <title>Next Level | Premium News System</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -25,57 +25,26 @@
         }
         .gold-text { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* Marquee ve Blink Efektleri - Eskiden olduğu gibi tam kontrol */
-        @keyframes marquee { 
-            0% { transform: translateX(0); } 
-            100% { transform: translateX(-100%); } 
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.1; }
-        }
-        .marquee-container {
-            display: flex;
-            white-space: nowrap;
-            overflow: hidden;
-        }
-        .marquee-content {
-            display: inline-block;
-            padding-left: 100%;
-            will-change: transform;
-        }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.1; } }
+        
+        .marquee-content { display: inline-block; padding-left: 100%; will-change: transform; }
         .animate-blink { animation: blink 0.8s infinite; }
         
-        /* Makale Görsel Yönetimi - Makale içinde sadece içerik görselleri görünür */
         .article-body img { 
-            max-width: 100%; 
-            height: auto; 
-            margin: 2.5rem auto; 
-            display: block; 
-            border-radius: 12px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.05);
+            max-width: 100%; height: auto; margin: 2.5rem auto; display: block; border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05);
         }
 
         .admin-field {
-            background: #111;
-            border: 1px solid #222;
-            color: white;
-            padding: 14px;
-            width: 100%;
-            border-radius: 10px;
-            outline: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #111; border: 1px solid #222; color: white; padding: 12px;
+            width: 100%; border-radius: 8px; outline: none; transition: all 0.3s;
         }
         .admin-field:focus { border-color: var(--accent); background: #161616; }
 
-        input[type="range"] {
-            -webkit-appearance: none;
-            height: 4px;
-            background: #222;
-            border-radius: 5px;
-            accent-color: var(--accent);
-        }
+        input[type="range"] { -webkit-appearance: none; height: 4px; background: #222; border-radius: 5px; accent-color: var(--accent); }
+        
+        .ad-slot { background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1); padding: 20px; text-align: center; margin: 20px 0; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -87,87 +56,79 @@
         const RenderHTML = ({ html }) => <div dangerouslySetInnerHTML={{ __html: html }} />;
 
         function App() {
-            // VIEW & AUTH STATE
             const [view, setView] = useState('home'); 
             const [selectedArticle, setSelectedArticle] = useState(null);
             const [isAdmin, setIsAdmin] = useState(false);
             const [passInput, setPassInput] = useState('');
+            const [editingId, setEditingId] = useState(null);
             
-            // AYARLAR (Eskiden olan her özellik burada)
+            // AYARLAR
             const [settings, setSettings] = useState({
                 announcement: { 
-                    label: "ÖZEL HABER",
-                    emoji: "🌟",
-                    text: "TEKNOLOJİ VE TASARIMIN BULUŞTUĞU NOKTADA YENİ BİR GELECEK İNŞA EDİLİYOR - ", 
-                    isScrolling: true,
-                    speed: 25, // Saniye cinsinden hız
-                    isBlinking: true,
-                    color: "#d4af37",
-                    labelBg: "#d4af37",
-                    labelTextColor: "#000000"
+                    label: "ÖZEL HABER", emoji: "🌟",
+                    text: "PREMIUM HABER DENEYİMİNE HOŞ GELDİNİZ - ", 
+                    isScrolling: true, speed: 25, isBlinking: true,
+                    color: "#d4af37", labelBg: "#d4af37", labelTextColor: "#000000"
+                },
+                ads: {
+                    top: { content: "Buraya reklam kodu veya metni gelecek (Üst)" },
+                    bottom: { content: "Buraya reklam kodu veya metni gelecek (Alt)" },
+                    between: { content: "Makaleler Arası Reklam Alanı" }
                 }
             });
 
             // MAKALELER
             const [articles, setArticles] = useState([
                 { 
-                    id: 1, 
-                    title: "Sürdürülebilir Mimari: Yarının Yaşam Alanları", 
-                    category: "MİMARİ", 
-                    image: "https://images.unsplash.com/photo-1449156001935-d2863fb72690?w=1200",
-                    excerpt: "Doğa ile iç içe, kendi enerjisini üreten yapılar.",
-                    content: "<p>Bu makale, geleceğin şehir planlamasında kullanılan biyo-mimari tekniklerini ele almaktadır.</p><img src='https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800' /><p>Yukarıdaki görsel bir içerik görselidir. Kapak görseli makale içinde görünmez.</p>",
-                    date: "04.03.2026"
+                    id: 1, title: "Geleceğin Teknolojisi", category: "BİLİM", 
+                    image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800",
+                    excerpt: "Yapay zeka ve insan entegrasyonu hakkında her şey.",
+                    content: "<p>Modern dünyanın hızı artık saniyelerle ölçülüyor...</p>",
+                    articleAd: "Bu makaleye özel reklam alanı",
+                    date: "01.03.2026"
                 }
             ]);
 
-            const [form, setForm] = useState({ title: '', category: '', image: '', excerpt: '', content: '' });
+            const [form, setForm] = useState({ title: '', category: '', image: '', excerpt: '', content: '', articleAd: '' });
 
-            // ADMIN LOGIN
             const handleLogin = () => {
-                if(passInput === 'pofuduk') { 
-                    setIsAdmin(true); 
-                    setView('dashboard'); 
-                    setPassInput('');
-                }
+                if(passInput === 'pofuduk') { setIsAdmin(true); setView('dashboard'); setPassInput(''); }
             };
 
-            // ARTICLE MANAGEMENT
             const saveArticle = () => {
                 if(!form.title || !form.image) return;
-                const newArt = { 
-                    ...form, 
-                    id: Date.now(), 
-                    date: new Date().toLocaleDateString('tr-TR') 
-                };
-                setArticles([newArt, ...articles]);
-                setForm({ title: '', category: '', image: '', excerpt: '', content: '' });
-                setView('dashboard');
+                if(editingId) {
+                    setArticles(articles.map(a => a.id === editingId ? { ...a, ...form } : a));
+                    setEditingId(null);
+                } else {
+                    const newArt = { ...form, id: Date.now(), date: new Date().toLocaleDateString('tr-TR') };
+                    setArticles([newArt, ...articles]);
+                }
+                setForm({ title: '', category: '', image: '', excerpt: '', content: '', articleAd: '' });
             };
 
-            const deleteArticle = (id) => {
-                setArticles(articles.filter(a => a.id !== id));
+            const editArticle = (art) => {
+                setForm(art);
+                setEditingId(art.id);
+                window.scrollTo(0,0);
             };
 
             return (
                 <div className="flex flex-col min-h-screen">
                     
-                    {/* DUYURU BAR - STICKY & FULL FEATURES */}
-                    <div className="fixed top-0 left-0 z-50 w-full h-14 flex items-center bg-black/95 border-b border-white/5 backdrop-blur-xl">
+                    {/* DUYURU BARI */}
+                    <div className="fixed top-0 left-0 z-50 w-full h-12 flex items-center bg-black/95 border-b border-white/5 backdrop-blur-xl">
                         <div 
-                            className={`px-6 h-full flex items-center z-20 shadow-[10px_0_30px_rgba(0,0,0,0.5)] transition-all duration-500 ${settings.announcement.isBlinking ? 'animate-blink' : ''}`}
+                            className={`px-4 h-full flex items-center z-20 ${settings.announcement.isBlinking ? 'animate-blink' : ''}`}
                             style={{ backgroundColor: settings.announcement.labelBg }}
                         >
-                            <span 
-                                className="font-black text-[12px] tracking-tighter whitespace-nowrap"
-                                style={{ color: settings.announcement.labelTextColor }}
-                            >
+                            <span className="font-black text-[10px] tracking-tighter uppercase" style={{ color: settings.announcement.labelTextColor }}>
                                 {settings.announcement.emoji} {settings.announcement.label}
                             </span>
                         </div>
                         <div className="relative flex-1 overflow-hidden h-full flex items-center">
                             <div 
-                                className={`${settings.announcement.isScrolling ? 'marquee-content' : 'px-8 w-full'} text-[11px] font-bold uppercase tracking-[0.2em]`}
+                                className={`${settings.announcement.isScrolling ? 'marquee-content' : 'px-8 w-full'} text-[10px] font-bold uppercase tracking-[0.2em]`}
                                 style={{ 
                                     color: settings.announcement.color,
                                     animation: settings.announcement.isScrolling ? `marquee ${settings.announcement.speed}s linear infinite` : 'none'
@@ -178,53 +139,69 @@
                         </div>
                     </div>
 
-                    {/* HEADER / LOGO */}
-                    <header className="mt-28 mb-12 text-center px-6">
+                    {/* HEADER */}
+                    <header className="mt-24 mb-6 text-center px-6">
                         <div className="cursor-pointer inline-block group" onClick={() => {setView('home'); setSelectedArticle(null);}}>
-                            <h1 className="text-6xl md:text-8xl font-serif font-black italic gold-text tracking-tighter transition-all duration-700 group-hover:tracking-normal">Next Level</h1>
-                            <p className="text-[10px] tracking-[0.6em] text-gray-600 uppercase mt-4 font-black">Digital Authority & News</p>
+                            <h1 className="text-4xl md:text-5xl font-serif font-black italic gold-text tracking-tighter">Next Level</h1>
+                            <p className="text-[9px] tracking-[0.4em] text-gray-600 uppercase mt-2 font-black">Premium News Control</p>
                         </div>
                     </header>
 
-                    {/* ANA SAYFA GRID */}
+                    {/* REKLAM ALANI: ÜST */}
+                    <div className="max-w-7xl mx-auto w-full px-6">
+                        <div className="ad-slot text-[10px] text-gray-500 uppercase tracking-widest italic">
+                            <RenderHTML html={settings.ads.top.content} />
+                        </div>
+                    </div>
+
+                    {/* ANA SAYFA */}
                     {view === 'home' && (
-                        <main className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                            {articles.map(art => (
-                                <div 
-                                    key={art.id} 
-                                    className="group cursor-pointer bg-surface/30 border border-white/5 rounded-[2rem] overflow-hidden transition-all duration-500 hover:border-accent/40 hover:-translate-y-2 shadow-2xl"
-                                    onClick={() => {setSelectedArticle(art); setView('article'); window.scrollTo(0,0);}}
-                                >
-                                    <div className="h-64 overflow-hidden relative">
-                                        <img src={art.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt={art.title} />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
-                                        <span className="absolute bottom-4 left-6 text-accent text-[10px] font-black tracking-widest uppercase">{art.category}</span>
-                                    </div>
-                                    <div className="p-8">
-                                        <h3 className="text-2xl font-bold font-serif italic text-white/90 leading-tight mb-4 group-hover:text-accent transition-colors">{art.title}</h3>
-                                        <p className="text-gray-500 text-sm line-clamp-2 font-light leading-relaxed tracking-wide">{art.excerpt}</p>
-                                    </div>
-                                </div>
-                            ))}
+                        <main className="max-w-7xl mx-auto px-6 py-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {articles.map((art, index) => (
+                                    <React.Fragment key={art.id}>
+                                        <div 
+                                            className="group bg-surface/30 border border-white/5 rounded-3xl overflow-hidden transition-all duration-500 hover:border-accent/40"
+                                        >
+                                            <div className="h-56 overflow-hidden relative cursor-pointer" onClick={() => {setSelectedArticle(art); setView('article'); window.scrollTo(0,0);}}>
+                                                <img src={art.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                                                <span className="absolute top-4 left-4 bg-black/80 px-3 py-1 text-accent text-[8px] font-black tracking-widest uppercase rounded-full border border-accent/20">{art.category}</span>
+                                            </div>
+                                            <div className="p-6">
+                                                <h3 className="text-xl font-bold font-serif italic text-white/90 mb-3">{art.title}</h3>
+                                                <p className="text-gray-500 text-xs line-clamp-2 mb-6">{art.excerpt}</p>
+                                                <button 
+                                                    onClick={() => {setSelectedArticle(art); setView('article'); window.scrollTo(0,0);}}
+                                                    className="flex items-center gap-2 text-[10px] font-black text-accent uppercase tracking-widest group/btn"
+                                                >
+                                                    OKU <span className="transition-transform group-hover/btn:translate-x-1">→</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {/* REKLAM ALANI: ARALARDA */}
+                                        {(index + 1) % 3 === 0 && index !== articles.length - 1 && (
+                                            <div className="col-span-full ad-slot">
+                                                <RenderHTML html={settings.ads.between.content} />
+                                            </div>
+                                        )}
+                                    </React.Fragment>
+                                ))}
+                            </div>
                         </main>
                     )}
 
-                    {/* MAKALE DETAY SAYFASI */}
+                    {/* MAKALE DETAY */}
                     {view === 'article' && selectedArticle && (
-                        <main className="max-w-4xl mx-auto px-6 py-16">
-                            <button onClick={() => setView('home')} className="mb-16 group flex items-center gap-4 text-gray-500 hover:text-white transition-all">
-                                <span className="text-2xl transition-transform group-hover:-translate-x-2">←</span>
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Ana Sayfaya Dön</span>
-                            </button>
-                            
-                            <article className="text-center">
-                                <span className="text-accent text-[12px] font-black tracking-[0.5em] uppercase block mb-8">{selectedArticle.category}</span>
-                                <h2 className="text-5xl md:text-7xl font-serif font-black italic mb-12 leading-[1.1] tracking-tighter">{selectedArticle.title}</h2>
-                                <div className="h-[2px] w-24 bg-accent/20 mx-auto mb-10"></div>
-                                <p className="text-gray-600 text-[11px] font-bold tracking-[0.4em] uppercase mb-20 italic">Yayın Tarihi: {selectedArticle.date}</p>
-                                
-                                <div className="article-body text-gray-300 leading-[1.8] text-xl font-light text-left max-w-3xl mx-auto">
+                        <main className="max-w-4xl mx-auto px-6 py-10">
+                            <button onClick={() => setView('home')} className="mb-10 text-gray-600 hover:text-white text-[9px] font-black uppercase tracking-widest">← GERİ DÖN</button>
+                            <article>
+                                <h2 className="text-4xl md:text-6xl font-serif font-black italic mb-10 text-center">{selectedArticle.title}</h2>
+                                <div className="article-body text-gray-400 leading-relaxed text-lg">
                                     <RenderHTML html={selectedArticle.content} />
+                                </div>
+                                {/* MAKALE ÖZEL REKLAM */}
+                                <div className="mt-12 p-6 bg-white/5 rounded-xl border border-white/5 text-center italic text-sm text-gray-500">
+                                    <RenderHTML html={selectedArticle.articleAd} />
                                 </div>
                             </article>
                         </main>
@@ -232,99 +209,86 @@
 
                     {/* ADMIN DASHBOARD */}
                     {view === 'dashboard' && isAdmin && (
-                        <main className="max-w-7xl mx-auto p-10 grid grid-cols-1 lg:grid-cols-2 gap-20">
-                            {/* İÇERİK EKLEME */}
-                            <div className="space-y-10">
-                                <div className="flex justify-between items-end">
-                                    <h2 className="text-4xl font-black gold-text italic tracking-tighter">İçerik Paneli</h2>
-                                    <span className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">{articles.length} Kayıtlı Makale</span>
+                        <main className="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-2 gap-10">
+                            {/* MAKALE FORMU */}
+                            <div className="space-y-6">
+                                <h2 className="text-2xl font-black gold-text italic">{editingId ? 'Makaleyi Düzenle' : 'Yeni İçerik'}</h2>
+                                <div className="bg-surface p-6 rounded-2xl border border-white/5 space-y-4">
+                                    <input className="admin-field" placeholder="Başlık" value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <input className="admin-field" placeholder="Kategori" value={form.category} onChange={e => setForm({...form, category: e.target.value})} />
+                                        <input className="admin-field" placeholder="Görsel URL" value={form.image} onChange={e => setForm({...form, image: e.target.value})} />
+                                    </div>
+                                    <textarea className="admin-field h-20" placeholder="Kısa Özet" value={form.excerpt} onChange={e => setForm({...form, excerpt: e.target.value})} />
+                                    <textarea className="admin-field h-60 font-mono text-xs" placeholder="İçerik (HTML)" value={form.content} onChange={e => setForm({...form, content: e.target.value})} />
+                                    <input className="admin-field" placeholder="Bu Makaleye Özel Reklam (Kodu veya Yazı)" value={form.articleAd} onChange={e => setForm({...form, articleAd: e.target.value})} />
+                                    <button onClick={saveArticle} className="w-full bg-accent text-white font-black p-4 rounded-xl uppercase tracking-widest text-xs">
+                                        {editingId ? 'GÜNCELLEMEYİ KAYDET' : 'YAYINLA'}
+                                    </button>
                                 </div>
-                                <div className="bg-surface/60 p-10 rounded-[2.5rem] border border-white/5 space-y-5 shadow-inner">
-                                    <input className="admin-field" placeholder="Haber Başlığı" value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
-                                    <input className="admin-field" placeholder="Kategori" value={form.category} onChange={e => setForm({...form, category: e.target.value})} />
-                                    <input className="admin-field" placeholder="Kapak Görseli URL" value={form.image} onChange={e => setForm({...form, image: e.target.value})} />
-                                    <textarea className="admin-field h-24" placeholder="Kısa Özet" value={form.excerpt} onChange={e => setForm({...form, excerpt: e.target.value})} />
-                                    <textarea className="admin-field h-72 font-mono text-xs" placeholder="Makale İçeriği (HTML ve <img> serbest)" value={form.content} onChange={e => setForm({...form, content: e.target.value})} />
-                                    <button onClick={saveArticle} className="w-full bg-accent text-black font-black p-6 rounded-2xl hover:brightness-125 transition-all uppercase tracking-[0.4em] text-sm shadow-[0_10px_30px_rgba(212,175,55,0.2)]">Sisteme Yükle</button>
+
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-bold text-gray-500 uppercase italic">Mevcut Makaleler</h3>
+                                    {articles.map(a => (
+                                        <div key={a.id} className="bg-white/5 p-4 rounded-xl flex justify-between items-center border border-white/5">
+                                            <span className="text-xs font-bold truncate pr-4">{a.title}</span>
+                                            <div className="flex gap-2">
+                                                <button onClick={() => editArticle(a)} className="px-3 py-1 bg-blue-900/40 text-blue-400 text-[9px] font-black rounded uppercase">Düzenle</button>
+                                                <button onClick={() => setArticles(articles.filter(x => x.id !== a.id))} className="px-3 py-1 bg-red-900/40 text-red-400 text-[9px] font-black rounded uppercase">Sil</button>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
-                            {/* DUYURU AYARLARI */}
-                            <div className="space-y-10">
-                                <h2 className="text-4xl font-black gold-text italic tracking-tighter">Sistem Kontrolü</h2>
-                                <div className="bg-surface p-10 rounded-[2.5rem] border border-white/5 space-y-8 shadow-2xl">
-                                    <div className="grid grid-cols-2 gap-6">
+                            {/* SİSTEM VE REKLAM AYARLARI */}
+                            <div className="space-y-6">
+                                <h2 className="text-2xl font-black gold-text italic">Sistem & Reklam</h2>
+                                <div className="bg-surface p-6 rounded-2xl border border-white/5 space-y-6">
+                                    <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="text-[10px] font-bold text-gray-500 uppercase mb-3 block italic tracking-widest">Etiket</label>
-                                            <input className="admin-field" value={settings.announcement.label} onChange={e => setSettings({...settings, announcement: {...settings.announcement, label: e.target.value}})} />
+                                            <label className="text-[9px] text-gray-500 font-bold mb-2 block uppercase">Metin Rengi</label>
+                                            <input type="color" className="w-full h-10 bg-transparent border-0" value={settings.announcement.color} onChange={e => setSettings({...settings, announcement: {...settings.announcement, color: e.target.value}})} />
                                         </div>
                                         <div>
-                                            <label className="text-[10px] font-bold text-gray-500 uppercase mb-3 block italic tracking-widest">Emoji</label>
-                                            <input className="admin-field" value={settings.announcement.emoji} onChange={e => setSettings({...settings, announcement: {...settings.announcement, emoji: e.target.value}})} />
+                                            <label className="text-[9px] text-gray-500 font-bold mb-2 block uppercase">Blink Aktif</label>
+                                            <input type="checkbox" className="w-6 h-6 accent-accent" checked={settings.announcement.isBlinking} onChange={e => setSettings({...settings, announcement: {...settings.announcement, isBlinking: e.target.checked}})} />
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="text-[10px] font-bold text-gray-500 uppercase mb-3 block italic tracking-widest">Duyuru Metni</label>
-                                        <textarea className="admin-field h-32" value={settings.announcement.text} onChange={e => setSettings({...settings, announcement: {...settings.announcement, text: e.target.value}})} />
-                                    </div>
-                                    <div className="space-y-8 pt-8 border-t border-white/5">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest italic">Akış Hızı ({settings.announcement.speed}s)</span>
-                                            <input type="range" min="5" max="120" value={settings.announcement.speed} onChange={e => setSettings({...settings, announcement: {...settings.announcement, speed: parseInt(e.target.value)}})} />
-                                        </div>
-                                        <div className="flex flex-wrap gap-8">
-                                            <label className="flex items-center gap-4 cursor-pointer group">
-                                                <input type="checkbox" className="w-5 h-5 accent-accent rounded-full" checked={settings.announcement.isScrolling} onChange={e => setSettings({...settings, announcement: {...settings.announcement, isScrolling: e.target.checked}})} />
-                                                <span className="text-[10px] uppercase font-bold text-gray-500 group-hover:text-white transition-colors tracking-widest">Animasyon Aktif</span>
-                                            </label>
-                                            <label className="flex items-center gap-4 cursor-pointer group">
-                                                <input type="checkbox" className="w-5 h-5 accent-accent rounded-full" checked={settings.announcement.isBlinking} onChange={e => setSettings({...settings, announcement: {...settings.announcement, isBlinking: e.target.checked}})} />
-                                                <span className="text-[10px] uppercase font-bold text-gray-500 group-hover:text-white transition-colors tracking-widest">Blink (Yanıp Sönme)</span>
-                                            </label>
-                                        </div>
+                                    
+                                    <div className="space-y-4 pt-4 border-t border-white/5">
+                                        <h4 className="text-[10px] font-black text-accent uppercase tracking-widest">Genel Reklam Yönetimi</h4>
+                                        <textarea className="admin-field h-20 text-[10px]" placeholder="Üst Reklam (HTML/Yazı)" value={settings.ads.top.content} onChange={e => setSettings({...settings, ads: {...settings.ads, top: {content: e.target.value}}})} />
+                                        <textarea className="admin-field h-20 text-[10px]" placeholder="Aralar (HTML/Yazı)" value={settings.ads.between.content} onChange={e => setSettings({...settings, ads: {...settings.ads, between: {content: e.target.value}}})} />
+                                        <textarea className="admin-field h-20 text-[10px]" placeholder="Alt Reklam (HTML/Yazı)" value={settings.ads.bottom.content} onChange={e => setSettings({...settings, ads: {...settings.ads, bottom: {content: e.target.value}}})} />
                                     </div>
                                 </div>
-                                <div className="flex justify-between items-center px-4">
-                                    <button onClick={() => setView('home')} className="text-[11px] text-gray-600 font-bold hover:text-white underline underline-offset-8 uppercase tracking-widest transition-all">Paneli Kapat</button>
-                                    <div className="flex gap-4">
-                                        {articles.map(a => (
-                                            <button key={a.id} onClick={() => deleteArticle(a.id)} className="w-8 h-8 rounded-full bg-red-900/20 border border-red-900/50 text-red-500 text-[8px] font-black hover:bg-red-500 hover:text-white transition-all uppercase">X</button>
-                                        ))}
-                                    </div>
-                                </div>
+                                <button onClick={() => setView('home')} className="text-[10px] text-gray-500 font-bold uppercase tracking-widest hover:text-white transition-all underline decoration-accent underline-offset-8">Paneli Kapat</button>
                             </div>
                         </main>
                     )}
 
-                    {/* LOGIN MODAL */}
+                    {/* LOGIN */}
                     {view === 'admin-login' && (
-                        <div className="fixed inset-0 bg-black/99 flex items-center justify-center z-[100] backdrop-blur-3xl px-6">
-                            <div className="p-12 bg-surface border border-accent/20 rounded-[3rem] w-full max-w-sm text-center shadow-[0_0_100px_rgba(212,175,55,0.1)]">
-                                <div className="mb-10">
-                                    <h3 className="font-serif font-black text-3xl gold-text uppercase italic tracking-tighter mb-3">Güvenli Erişim</h3>
-                                    <p className="text-[10px] text-gray-600 font-bold uppercase tracking-[0.4em]">Auth Required</p>
-                                </div>
-                                <input type="password" autoFocus className="admin-field text-center mb-8 py-5 text-2xl tracking-[0.6em]" value={passInput} onChange={e => setPassInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleLogin()} />
-                                <button onClick={handleLogin} className="w-full bg-accent text-black font-black py-6 rounded-2xl uppercase text-xs tracking-[0.4em] shadow-2xl hover:brightness-125 transition-all">Sistemi Aç</button>
-                                <button onClick={() => setView('home')} className="mt-8 text-[9px] text-gray-700 font-bold hover:text-gray-400 uppercase tracking-widest transition-colors italic">Vazgeç</button>
+                        <div className="fixed inset-0 bg-black/98 flex items-center justify-center z-[100] px-6">
+                            <div className="p-10 bg-surface border border-accent/20 rounded-[2rem] w-full max-w-xs text-center">
+                                <h3 className="font-serif font-black text-2xl gold-text italic mb-8 uppercase">Erişim</h3>
+                                <input type="password" autoFocus className="admin-field text-center mb-6 text-xl tracking-[0.4em]" value={passInput} onChange={e => setPassInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleLogin()} />
+                                <button onClick={handleLogin} className="w-full bg-accent text-white font-black py-4 rounded-xl uppercase text-[10px] tracking-widest shadow-xl">SİSTEMİ DOĞRULA</button>
                             </div>
                         </div>
                     )}
 
-                    {/* FOOTER */}
-                    <footer className="mt-auto py-24 border-t border-white/5 text-center bg-black/50">
-                        <div className="gold-text text-3xl italic font-black mb-8 opacity-40 hover:opacity-100 transition-opacity duration-700 cursor-default tracking-tighter">Next Level</div>
-                        <div className="flex items-center justify-center gap-8 mb-8 opacity-20 hover:opacity-100 transition-opacity">
-                            <div className="w-12 h-[1px] bg-white"></div>
-                            <div className="w-2 h-2 bg-accent rotate-45"></div>
-                            <div className="w-12 h-[1px] bg-white"></div>
+                    {/* FOOTER & REKLAM ALANI: ALT */}
+                    <footer className="mt-auto py-12 border-t border-white/5 bg-black/50 text-center">
+                        <div className="max-w-7xl mx-auto px-6 mb-10">
+                            <div className="ad-slot text-[10px]">
+                                <RenderHTML html={settings.ads.bottom.content} />
+                            </div>
                         </div>
-                        <p className="text-[10px] text-gray-700 font-bold tracking-[0.5em] uppercase px-6">
-                            © 2026 Premium Publishing Group | Tüm Hakları Saklıdır
+                        <p className="text-[9px] text-gray-700 font-bold tracking-[0.4em] uppercase">
+                            © 2026 Premium Publishing Group | <span className="cursor-pointer text-white/5 hover:text-white" onClick={() => setView('admin-login')}>.</span>
                         </p>
-                        <div className="mt-12 flex justify-center gap-4">
-                            <span onClick={() => setView('admin-login')} className="cursor-pointer text-[9px] font-black text-white/5 hover:text-accent transition-colors uppercase tracking-[0.5em]">System Admin</span>
-                        </div>
                     </footer>
                 </div>
             );
