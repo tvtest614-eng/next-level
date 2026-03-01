@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Next Level | Premium Media Admin</title>
+    <title>Next Level | Premium Media</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -21,61 +21,46 @@
             color: #e5e5e5; 
             font-family: 'Montserrat', sans-serif; 
             margin: 0;
+            overflow-x: hidden;
         }
         .gold-text { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* Kayan Yazı Animasyonu */
+        /* Tam Genişlik Kayan Yazı */
         @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-        .marquee-container { overflow: hidden; white-space: nowrap; display: flex; align-items: center; }
-        .marquee-text { display: inline-block; animation: marquee 15s linear infinite; }
+        .marquee-wrapper { width: 100%; overflow: hidden; white-space: nowrap; position: relative; }
+        .marquee-text { display: inline-block; animation: marquee 20s linear infinite; padding-left: 100%; }
         
-        /* Makale İçeriği Resim Sınırlandırma */
+        /* Makale İçi Resimler - KESİN SINIRLAMA */
         .article-body img { 
-            max-width: 600px !important; 
+            max-width: 500px !important; 
+            width: 100% !important;
             height: auto !important; 
-            margin: 2rem auto !important; 
-            display: block; 
-            border-radius: 12px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            margin: 2.5rem auto !important; 
+            display: block !important; 
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
+
         .featured-image {
-            max-width: 700px;
+            max-width: 650px;
             width: 100%;
-            height: 400px;
+            height: 380px;
             object-fit: cover;
-            margin: 0 auto 2.5rem;
-            border-radius: 15px;
+            margin: 0 auto 2rem;
+            border-radius: 12px;
             display: block;
         }
 
-        /* Pagination Style */
-        .page-link {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(255,255,255,0.05);
-            color: white;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-        .page-link.active {
-            background: var(--accent);
-            color: black;
-            border-color: var(--accent);
-        }
-
         .admin-field {
-            background: #1a1a1a;
+            background: #111;
             border: 1px solid #333;
             color: white;
-            padding: 12px;
+            padding: 10px;
             width: 100%;
             border-radius: 4px;
-            font-size: 13px;
         }
+
+        .suggestion-card:hover img { transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -84,7 +69,6 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // HTML İçeriği Güvenli Render Etme
         const RenderHTML = ({ html }) => <div dangerouslySetInnerHTML={{ __html: html }} />;
 
         function App() {
@@ -96,17 +80,15 @@
             
             const postsPerPage = 8;
 
-            // Global Ayarlar (Duyuru ve Reklamlar)
             const [settings, setSettings] = useState({
-                announcement: { text: "PREMIUM MEDIA GÜNCEL HABERLER - 2026", isScrolling: true, color: "#d4af37", emoji: "📢" },
+                announcement: { text: "PREMIUM MEDIA GÜNCEL HABERLER - 2026 - YENİ NESİL YAYINCILIKTA LİDER", isScrolling: true, color: "#d4af37", emoji: "💎" },
                 ads: {
-                    header: { active: true, code: "<div style='text-align:center; padding:10px; border:1px dashed #444; font-size:10px;'>ÜST REKLAM ALANI (HTML DESTEKLİ)</div>" },
-                    footer: { active: true, code: "<div style='text-align:center; padding:10px; border:1px dashed #444; font-size:10px;'>ALT REKLAM ALANI</div>" },
-                    listBetween: { active: true, code: "<div style='background:#111; padding:20px; text-align:center; border:1px solid #222;'>LİSTE ARASI REKLAM</div>" }
+                    header: { active: true, code: "<div style='text-align:center; padding:15px; border:1px solid #222; font-size:11px; color:#555;'>HEADER REKLAM ALANI</div>" },
+                    footer: { active: true, code: "<div style='text-align:center; padding:15px; border:1px solid #222; font-size:11px; color:#555;'>FOOTER REKLAM ALANI</div>" },
+                    listBetween: { active: true, code: "<div style='background:#0a0a0a; padding:30px; text-align:center; border:1px solid #1a1a1a; color:#d4af37; font-weight:bold;'>LİSTE ARASI SPONSORLU İÇERİK</div>" }
                 }
             });
 
-            // Makaleler
             const [articles, setArticles] = useState([
                 { 
                     id: 1, 
@@ -114,13 +96,22 @@
                     category: "TASARIM", 
                     image: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
                     excerpt: "Sadelikteki gücü keşfedin.",
-                    content: "<p>Minimalizm sadece bir stil değil, bir yaşam biçimidir.</p><img src='https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?w=800' /><p>İçerikteki resimler artık daha küçük görünüyor.</p>",
-                    customAd: "", // Her makaleye özel farklı reklam alanı
+                    content: "<p>Minimalizm sadece bir stil değil, bir yaşam biçimidir.</p><img src='https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?w=800' /><p>İçerikteki resimler artık kesinlikle 500px genişliği geçemez.</p>",
+                    customAd: "<div style='padding:20px; border:1px solid #d4af37; text-align:center; color:#d4af37;'>BU MAKALE ÖZEL REKLAMIDIR</div>",
                     date: "01.03.2026"
+                },
+                { 
+                    id: 2, 
+                    title: "Geleceğin Otomobilleri", 
+                    category: "TEKNOLOJİ", 
+                    image: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800",
+                    excerpt: "Elektrikli araç devrimine hazır mısınız?",
+                    content: "<p>Otonom sürüş artık hayal değil.</p><img src='https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=800' />",
+                    customAd: "",
+                    date: "02.03.2026"
                 }
             ]);
 
-            // Form State
             const [form, setForm] = useState({ title: '', category: '', image: '', excerpt: '', content: '', customAd: '' });
 
             const handleLogin = () => {
@@ -129,13 +120,14 @@
             };
 
             const saveArticle = () => {
+                if(!form.title) return;
                 const newArt = { ...form, id: Date.now(), date: new Date().toLocaleDateString('tr-TR') };
                 setArticles([newArt, ...articles]);
                 setForm({ title: '', category: '', image: '', excerpt: '', content: '', customAd: '' });
                 setView('dashboard');
             };
 
-            // Pagination Logic
+            // Pagination
             const indexOfLast = currentPage * postsPerPage;
             const indexOfFirst = indexOfLast - postsPerPage;
             const currentArticles = articles.slice(indexOfFirst, indexOfLast);
@@ -144,54 +136,56 @@
             return (
                 <div className="flex flex-col min-h-screen">
                     
-                    {/* 1. DUYURU ALANI (EN SOLDA) */}
-                    <div className="fixed top-0 left-0 z-50 h-10 bg-black/80 backdrop-blur-md border-b border-white/10 flex items-center px-4 w-full md:w-auto md:max-w-md rounded-br-lg">
-                        <span className="mr-3 text-lg">{settings.announcement.emoji}</span>
-                        <div className="marquee-container flex-1">
-                            <span className={`${settings.announcement.isScrolling ? 'marquee-text' : ''} text-[10px] font-bold tracking-tighter`} style={{ color: settings.announcement.color }}>
+                    {/* DUYURU ALANI - TAM GENİŞLİK */}
+                    <div className="fixed top-0 left-0 z-50 w-full h-12 bg-black/90 backdrop-blur-xl border-b border-white/5 flex items-center shadow-2xl">
+                        <div className="bg-accent px-6 h-full flex items-center z-10 shadow-lg">
+                            <span className="text-black font-black text-sm tracking-tighter">{settings.announcement.emoji} FLAŞ</span>
+                        </div>
+                        <div className="marquee-wrapper">
+                            <span className={`${settings.announcement.isScrolling ? 'marquee-text' : 'px-4'} text-[11px] font-bold tracking-widest uppercase`} style={{ color: settings.announcement.color }}>
                                 {settings.announcement.text}
                             </span>
                         </div>
                     </div>
 
-                    {/* Logo ve Üst Reklam */}
-                    <header className="mt-16 text-center px-6">
-                        <div className="mb-8 cursor-pointer" onClick={() => {setView('home'); setSelectedArticle(null);}}>
-                            <h1 className="text-4xl font-serif font-black italic gold-text">Next Level</h1>
-                            <p className="text-[9px] tracking-[0.4em] uppercase text-gray-500 font-bold">Premium Media</p>
+                    <header className="mt-24 text-center px-6">
+                        <div className="mb-8 cursor-pointer inline-block" onClick={() => {setView('home'); setSelectedArticle(null);}}>
+                            <h1 className="text-5xl font-serif font-black italic gold-text tracking-tighter">Next Level</h1>
+                            <p className="text-[10px] tracking-[0.6em] uppercase text-gray-600 font-bold mt-1">Premium Media</p>
                         </div>
                         {settings.ads.header.active && (
-                            <div className="max-w-4xl mx-auto mb-10"><RenderHTML html={settings.ads.header.code} /></div>
+                            <div className="max-w-5xl mx-auto mb-12"><RenderHTML html={settings.ads.header.code} /></div>
                         )}
                     </header>
 
-                    {/* View: Home */}
+                    {/* Home View */}
                     {view === 'home' && (
                         <main className="max-w-7xl mx-auto px-6 pb-20">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
                                 {currentArticles.map((art, index) => (
                                     <React.Fragment key={art.id}>
-                                        <div className="group cursor-pointer bg-surface border border-white/5 rounded-lg overflow-hidden transition-all hover:border-accent" onClick={() => {setSelectedArticle(art); setView('article'); window.scrollTo(0,0);}}>
-                                            <img src={art.image} className="w-full h-48 object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                                            <div className="p-5">
-                                                <span className="text-accent text-[9px] font-black tracking-widest block mb-2">{art.category}</span>
-                                                <h3 className="text-lg font-bold font-serif italic mb-3 leading-tight">{art.title}</h3>
-                                                <p className="text-gray-500 text-xs line-clamp-2">{art.excerpt}</p>
+                                        <div className="group cursor-pointer bg-surface/50 border border-white/5 p-2 rounded-xl transition-all hover:bg-surface hover:border-accent/30" onClick={() => {setSelectedArticle(art); setView('article'); window.scrollTo(0,0);}}>
+                                            <div className="overflow-hidden rounded-lg mb-4 h-44">
+                                                <img src={art.image} className="w-full h-full object-cover opacity-90 group-hover:scale-110 transition-transform duration-500" />
+                                            </div>
+                                            <div className="px-2 pb-4">
+                                                <span className="text-accent text-[10px] font-black tracking-widest block mb-2">{art.category}</span>
+                                                <h3 className="text-lg font-bold font-serif italic mb-3 leading-tight group-hover:text-white">{art.title}</h3>
+                                                <p className="text-gray-500 text-xs line-clamp-2 italic">{art.excerpt}</p>
                                             </div>
                                         </div>
-                                        {/* Liste Arası Reklam (Her 4 kartta bir) */}
                                         {(index + 1) % 4 === 0 && settings.ads.listBetween.active && (
-                                            <div className="col-span-full my-4"><RenderHTML html={settings.ads.listBetween.code} /></div>
+                                            <div className="col-span-full my-6"><RenderHTML html={settings.ads.listBetween.code} /></div>
                                         )}
                                     </React.Fragment>
                                 ))}
                             </div>
 
-                            {/* Sayfalama Numaraları */}
                             {totalPages > 1 && (
-                                <div className="flex justify-center mt-16 gap-3">
+                                <div className="flex justify-center mt-20 gap-4">
                                     {[...Array(totalPages)].map((_, i) => (
-                                        <button key={i} onClick={() => {setCurrentPage(i+1); window.scrollTo(0,0);}} className={`page-link rounded ${currentPage === i+1 ? 'active' : ''}`}>
+                                        <button key={i} onClick={() => {setCurrentPage(i+1); window.scrollTo(0,0);}} 
+                                            className={`w-12 h-12 rounded-full border transition-all font-bold ${currentPage === i+1 ? 'bg-accent border-accent text-black' : 'border-white/10 text-white hover:border-accent'}`}>
                                             {i+1}
                                         </button>
                                     ))}
@@ -200,57 +194,77 @@
                         </main>
                     )}
 
-                    {/* View: Article Details */}
+                    {/* Article Detail View */}
                     {view === 'article' && selectedArticle && (
-                        <main className="max-w-4xl mx-auto px-6 py-10">
-                            <button onClick={() => setView('home')} className="mb-10 text-accent text-xs font-bold uppercase tracking-widest hover:underline">← Geri Dön</button>
-                            <h2 className="text-4xl font-serif font-black italic mb-6 text-center">{selectedArticle.title}</h2>
-                            <img src={selectedArticle.image} className="featured-image shadow-2xl" />
+                        <main className="max-w-5xl mx-auto px-6 py-10">
+                            <button onClick={() => setView('home')} className="mb-12 text-accent text-xs font-black uppercase tracking-[0.3em] hover:opacity-70 transition-opacity flex items-center gap-2">
+                                <span>←</span> ANA SAYFAYA DÖN
+                            </button>
                             
-                            {/* Makaleye Özel Reklam (Her makalede farklı olabilir) */}
-                            {selectedArticle.customAd && (
-                                <div className="my-8 border-y border-white/10 py-4"><RenderHTML html={selectedArticle.customAd} /></div>
-                            )}
+                            <article className="mb-20">
+                                <h2 className="text-5xl md:text-6xl font-serif font-black italic mb-10 text-center leading-tight">{selectedArticle.title}</h2>
+                                <img src={selectedArticle.image} className="featured-image" />
+                                
+                                {selectedArticle.customAd && (
+                                    <div className="max-w-2xl mx-auto my-12"><RenderHTML html={selectedArticle.customAd} /></div>
+                                )}
 
-                            <div className="article-body text-gray-300 leading-relaxed text-lg font-light italic max-w-2xl mx-auto">
-                                <RenderHTML html={selectedArticle.content} />
-                            </div>
+                                <div className="article-body text-gray-300 leading-relaxed text-xl font-light italic max-w-2xl mx-auto">
+                                    <RenderHTML html={selectedArticle.content} />
+                                </div>
+                            </article>
+
+                            {/* BUNLARI OKU KAÇIRMA ALANI */}
+                            <section className="border-t border-white/10 pt-16 mt-20">
+                                <h4 className="text-2xl font-serif font-black italic mb-10 gold-text text-center underline decoration-accent/30 underline-offset-8">Bunları Oku Kaçırma</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                    {articles.filter(a => a.id !== selectedArticle.id).slice(0, 3).map(art => (
+                                        <div key={art.id} className="suggestion-card group cursor-pointer" onClick={() => {setSelectedArticle(art); window.scrollTo(0,0);}}>
+                                            <div className="h-40 overflow-hidden rounded-lg mb-4">
+                                                <img src={art.image} className="w-full h-full object-cover transition-transform duration-500" />
+                                            </div>
+                                            <h5 className="text-sm font-bold font-serif italic group-hover:text-accent transition-colors">{art.title}</h5>
+                                            <span className="text-[9px] text-gray-600 uppercase font-black tracking-widest mt-2 block">{art.category}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
                         </main>
                     )}
 
-                    {/* View: Dashboard (Gelişmiş Reklam Yönetimiyle) */}
+                    {/* Dashboard */}
                     {view === 'dashboard' && isAdmin && (
-                        <main className="max-w-6xl mx-auto p-10 grid grid-cols-1 lg:grid-cols-2 gap-10">
+                        <main className="max-w-6xl mx-auto p-10 grid grid-cols-1 lg:grid-cols-2 gap-12">
                             <div className="space-y-6">
-                                <h2 className="text-xl font-bold gold-text uppercase tracking-widest">Makale Yönetimi</h2>
+                                <h2 className="text-2xl font-black gold-text italic">İçerik Ekle</h2>
                                 <input className="admin-field" placeholder="Başlık" value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
                                 <input className="admin-field" placeholder="Kategori" value={form.category} onChange={e => setForm({...form, category: e.target.value})} />
-                                <input className="admin-field" placeholder="Kapak Resim URL" value={form.image} onChange={e => setForm({...form, image: e.target.value})} />
-                                <textarea className="admin-field h-20" placeholder="Kısa Özet" value={form.excerpt} onChange={e => setForm({...form, excerpt: e.target.value})} />
-                                <textarea className="admin-field h-40 font-mono" placeholder="Makale İçeriği (HTML Kullanabilirsin)" value={form.content} onChange={e => setForm({...form, content: e.target.value})} />
-                                <textarea className="admin-field h-20 border-accent/30" placeholder="BU MAKALE İÇİN ÖZEL REKLAM KODU (HTML)" value={form.customAd} onChange={e => setForm({...form, customAd: e.target.value})} />
-                                <button onClick={saveArticle} className="w-full bg-accent text-black font-black p-4 rounded hover:bg-yellow-600 transition-colors uppercase">Yayınla</button>
+                                <input className="admin-field" placeholder="Kapak Görsel Linki" value={form.image} onChange={e => setForm({...form, image: e.target.value})} />
+                                <textarea className="admin-field h-24" placeholder="Kısa Özet" value={form.excerpt} onChange={e => setForm({...form, excerpt: e.target.value})} />
+                                <textarea className="admin-field h-48 font-mono text-sm" placeholder="İçerik (HTML Aktif)" value={form.content} onChange={e => setForm({...form, content: e.target.value})} />
+                                <textarea className="admin-field h-24 border-accent/20" placeholder="Bu sayfaya özel reklam kodu (HTML)" value={form.customAd} onChange={e => setForm({...form, customAd: e.target.value})} />
+                                <button onClick={saveArticle} className="w-full bg-accent text-black font-black p-4 rounded-lg hover:brightness-110 uppercase tracking-widest">Makaleyi Yayınla</button>
                             </div>
 
-                            <div className="space-y-6">
-                                <h2 className="text-xl font-bold gold-text uppercase tracking-widest">Global Reklam & Duyuru</h2>
-                                <div className="bg-surface p-6 rounded-lg border border-white/10 space-y-4">
-                                    <h4 className="text-xs font-bold text-accent">DUYURU ALANI AYARLARI</h4>
-                                    <input className="admin-field" placeholder="Duyuru Metni" value={settings.announcement.text} onChange={e => setSettings({...settings, announcement: {...settings.announcement, text: e.target.value}})} />
+                            <div className="space-y-8">
+                                <h2 className="text-2xl font-black gold-text italic">Sistem & Reklam</h2>
+                                <div className="bg-surface p-6 rounded-xl border border-white/5 space-y-4">
+                                    <label className="text-[10px] font-black text-accent uppercase">Duyuru Barı Ayarları</label>
+                                    <input className="admin-field" value={settings.announcement.text} onChange={e => setSettings({...settings, announcement: {...settings.announcement, text: e.target.value}})} />
                                     <div className="flex gap-4">
                                         <select className="admin-field flex-1" value={settings.announcement.isScrolling} onChange={e => setSettings({...settings, announcement: {...settings.announcement, isScrolling: e.target.value === 'true'}})}>
                                             <option value="true">Kayan Yazı</option>
-                                            <option value="false">Sabit Yazı</option>
+                                            <option value="false">Sabit Dur</option>
                                         </select>
-                                        <input className="admin-field w-20" type="color" value={settings.announcement.color} onChange={e => setSettings({...settings, announcement: {...settings.announcement, color: e.target.value}})} />
+                                        <input className="admin-field w-20 h-11" type="color" value={settings.announcement.color} onChange={e => setSettings({...settings, announcement: {...settings.announcement, color: e.target.value}})} />
                                     </div>
                                 </div>
-                                <div className="bg-surface p-6 rounded-lg border border-white/10 space-y-6">
-                                    <h4 className="text-xs font-bold text-accent">GLOBAL REKLAM KODLARI (HTML)</h4>
+                                <div className="bg-surface p-6 rounded-xl border border-white/5 space-y-6">
+                                    <label className="text-[10px] font-black text-accent uppercase">Genel Reklam Alanları (HTML)</label>
                                     {Object.entries(settings.ads).map(([key, ad]) => (
-                                        <div key={key}>
-                                            <div className="flex justify-between items-center mb-2">
-                                                <span className="text-[10px] font-bold text-gray-500 uppercase">{key} REKLAMI</span>
+                                        <div key={key} className="space-y-2">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-[10px] font-bold text-gray-500 uppercase">{key}</span>
                                                 <input type="checkbox" checked={ad.active} onChange={e => setSettings({...settings, ads: {...settings.ads, [key]: {...ad, active: e.target.checked}}})} />
                                             </div>
                                             <textarea className="admin-field h-20 text-[10px] font-mono" value={ad.code} onChange={e => setSettings({...settings, ads: {...settings.ads, [key]: {...ad, code: e.target.value}}})} />
@@ -261,25 +275,25 @@
                         </main>
                     )}
 
-                    {/* Admin Giriş (Gizli Şifre Ekranı) */}
+                    {/* Admin Giriş Modalı */}
                     {view === 'admin-login' && (
-                        <div className="fixed inset-0 bg-black flex items-center justify-center z-[100]">
-                            <div className="p-10 bg-surface border border-white/10 rounded-xl w-80">
-                                <h3 className="text-center font-bold mb-6 text-accent uppercase tracking-widest">Sistem Girişi</h3>
-                                <input type="password" autoFocus className="admin-field text-center mb-4" value={passInput} onChange={e => setPassInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleLogin()} />
-                                <button onClick={handleLogin} className="w-full bg-accent text-black font-bold p-3 rounded">GİRİŞ</button>
-                                <button onClick={() => setView('home')} className="w-full text-gray-500 text-[10px] mt-4 uppercase">Vazgeç</button>
+                        <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-[100] backdrop-blur-md">
+                            <div className="p-8 bg-surface border border-accent/20 rounded-2xl w-full max-w-sm shadow-[0_0_50px_rgba(212,175,55,0.1)]">
+                                <h3 className="text-center font-serif font-black italic text-2xl mb-8 gold-text uppercase">Panel Girişi</h3>
+                                <input type="password" autoFocus className="admin-field text-center mb-6 py-4 text-xl tracking-[0.5em]" value={passInput} onChange={e => setPassInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleLogin()} />
+                                <button onClick={handleLogin} className="w-full bg-accent text-black font-black p-4 rounded-lg shadow-lg hover:scale-[1.02] transition-transform">SİSTEME GİRİŞ YAP</button>
+                                <button onClick={() => setView('home')} className="w-full text-gray-600 text-[10px] mt-6 uppercase font-bold tracking-widest">İptal Et</button>
                             </div>
                         </div>
                     )}
 
-                    <footer className="mt-auto py-10 border-t border-white/5 text-center px-6">
+                    <footer className="mt-auto py-12 border-t border-white/5 text-center px-6 bg-black">
                         {settings.ads.footer.active && (
-                            <div className="max-w-4xl mx-auto mb-6"><RenderHTML html={settings.ads.footer.code} /></div>
+                            <div className="max-w-5xl mx-auto mb-10"><RenderHTML html={settings.ads.footer.code} /></div>
                         )}
-                        <p className="text-[10px] text-gray-600 font-bold tracking-widest uppercase">
-                            © 2026 Next Level Premium Media
-                            <span className="cursor-default" onClick={() => setView('admin-login')}>.</span>
+                        <p className="text-[10px] text-gray-700 font-bold tracking-[0.4em] uppercase">
+                            © 2026 Next Level Premium Media Group
+                            <span className="cursor-default select-none ml-1 opacity-20 hover:opacity-100" onClick={() => setView('admin-login')}>.</span>
                         </p>
                     </footer>
                 </div>
